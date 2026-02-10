@@ -1,158 +1,198 @@
-import React, { useState, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
+import './App.css';
+import {
+  generateLiveOccupancy,
+  generatePredictionData,
+  generateTrendData,
+  getBestVisitWindow,
+  getConfidenceLabel,
+  isDataStale,
+} from './utils';
 
-// Mock data generators
-const generateLiveOccupancy = () => {
-  const base = Math.floor(Math.random() * 100);
+const OCCUPANCY_COLORS = {
+  Low: '#059669',
+  Moderate: '#2563eb',
+  High: '#dc2626',
+};
+
+const fetchDashboardData = async () => {
+  await new Promise((resolve) => setTimeout(resolve, 450));
+
+  if (Math.random() < 0.04) {
+    throw new Error('Unable to reach sensor network.');
+  }
+
   return {
-    percentage: base,
-    level: base < 30 ? 'Low' : base < 70 ? 'Moderate' : 'High',
-    timestamp: new Date().toLocaleTimeString()
+    live: generateLiveOccupancy(),
+    trend: generateTrendData(),
+    predictions: generatePredictionData(),
   };
 };
 
-const generateTrendData = () => {
-  const data = [];
-  for (let i = 23; i >= 0; i--) {
-    const hourAgo = new Date(Date.now() - i * 60 * 60 * 1000);
-    data.push({
-      time: hourAgo.toLocaleTimeString([], {hour: '2-digit'}),
-      occupancy: Math.floor(Math.random() * 100)
-    });
-  }
-  return data;
-};
-
-const generatePredictionData = () => {
-  const data = [];
-  for (let i = 0; i < 12; i++) {
-    const futureHour = new Date(Date.now() + i * 60 * 60 * 1000);
-    data.push({
-      time: futureHour.toLocaleTimeString([], {hour: '2-digit'}),
-      predicted: Math.floor(Math.random() * 100),
-      low: Math.floor(Math.random() * 30),
-      high: Math.floor(Math.random() * 100)
-    });
-  }
-  return data;
-};
-
-const OccupancyIndicator = ({ occupancy }) => {
-  const getLevelColor = (level) => {
-    switch(level) {
-      case 'Low': return '#10B981'; // green
-      case 'Moderate': return '#F59E0B'; // amber
-      case 'High': return '#EF4444'; // red
-      default: return '#6B7280'; // gray
-    }
-  };
+const FreshnessBadge = ({ lastUpdatedAt }) => {
+  const stale = isDataStale(lastUpdatedAt);
+  const date = new Date(lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Current Occupancy</h2>
-      <div className="flex items-center justify-between">
+    <div className={`badge ${stale ? 'badge-warn' : 'badge-ok'}`} role="status" aria-live="polite">
+      {stale ? 'Data delayed' : 'Live data'} • Updated {date}
+    </div>
+  );
+};
+
+const StatusCard = ({ live }) => {
+  const levelColor = OCCUPANCY_COLORS[live.level] || '#334155';
+
+  return (
+    <section className="card">
+      <div className="card-header">
+        <h2>Current occupancy</h2>
+        <FreshnessBadge lastUpdatedAt={live.lastUpdatedAt} />
+      </div>
+
+      <div className="status-grid">
         <div>
-          <div className="text-5xl font-bold" style={{color: getLevelColor(occupancy.level)}}>
-            {occupancy.percentage}%
-          </div>
-          <div className="text-lg capitalize" style={{color: getLevelColor(occupancy.level)}}>
-            {occupancy.level}
-          </div>
+          <p className="big-number" style={{ color: levelColor }}>{live.percentage}%</p>
+          <p className="level" style={{ color: levelColor }}>{live.level}</p>
+          <p className="subtle">Estimated headcount: {live.estimatedHeadcount} members</p>
         </div>
-        <div className="text-right">
-          <div className="text-gray-500">Last updated</div>
-          <div className="font-medium">{occupancy.timestamp}</div>
+
+        <div className="confidence-box">
+          <p className="subtle">Prediction trust</p>
+          <p className="confidence-label">{getConfidenceLabel(live.confidence)}</p>
+          <div className="meter" aria-label="Prediction confidence meter">
+            <span style={{ width: `${live.confidence}%` }} />
+          </div>
+          <p className="subtle">{live.confidence}% confidence</p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
-const TrendChart = ({ data }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Occupancy Trend (Last 24 Hours)</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip formatter={(value) => [`${value}%`, 'Occupancy']} />
-          <Line type="monotone" dataKey="occupancy" stroke="#3B82F6" strokeWidth={2} activeDot={{ r: 8 }} />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
-  );
-};
+const TrendChartCard = ({ trend }) => (
+  <section className="card">
+    <h2>Last 24 hours</h2>
+    <ResponsiveContainer width="100%" height={250}>
+      <LineChart data={trend}>
+        <CartesianGrid strokeDasharray="4 4" />
+        <XAxis dataKey="time" />
+        <YAxis domain={[0, 100]} unit="%" />
+        <Tooltip formatter={(value) => [`${value}%`, 'Occupancy']} />
+        <Line dataKey="occupancy" stroke="#2563eb" strokeWidth={3} dot={false} />
+      </LineChart>
+    </ResponsiveContainer>
+  </section>
+);
 
-const PredictionChart = ({ data }) => {
-  return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Predicted Occupancy (Next 12 Hours)</h2>
-      <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="time" />
-          <YAxis domain={[0, 100]} />
-          <Tooltip formatter={(value) => [`${value}%`, 'Predicted']} />
-          <Legend />
-          <Bar dataKey="predicted" fill="#8B5CF6" name="Predicted Occupancy" />
-          <Bar dataKey="low" fill="#10B981" name="Low Estimate" />
-          <Bar dataKey="high" fill="#EF4444" name="High Estimate" />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-};
+const PredictionChartCard = ({ predictions }) => (
+  <section className="card">
+    <h2>Next 12 hours forecast</h2>
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={predictions}>
+        <CartesianGrid strokeDasharray="4 4" />
+        <XAxis dataKey="time" />
+        <YAxis domain={[0, 100]} unit="%" />
+        <Tooltip formatter={(value) => [`${value}%`, 'Forecast']} />
+        <Legend />
+        <Bar dataKey="predicted" name="Predicted occupancy">
+          {predictions.map((entry) => (
+            <Cell key={entry.time} fill={entry.peakWindow ? '#dc2626' : '#0ea5e9'} />
+          ))}
+        </Bar>
+        <Area type="monotone" dataKey="upperBound" fill="#bfdbfe" stroke="#93c5fd" name="High estimate" />
+        <Area type="monotone" dataKey="lowerBound" fill="#dcfce7" stroke="#86efac" name="Low estimate" />
+      </BarChart>
+    </ResponsiveContainer>
+  </section>
+);
 
-const App = () => {
-  const [liveOccupancy, setLiveOccupancy] = useState(generateLiveOccupancy());
-  const [trendData, setTrendData] = useState(generateTrendData());
-  const [predictionData, setPredictionData] = useState(generatePredictionData());
+function App() {
+  const [live, setLive] = useState(null);
+  const [trend, setTrend] = useState([]);
+  const [predictions, setPredictions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Update live occupancy every 30 seconds
+  const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLiveOccupancy(generateLiveOccupancy());
-    }, 30000);
+    let mounted = true;
 
-    return () => clearInterval(interval);
+    const load = async () => {
+      try {
+        setError('');
+        const data = await fetchDashboardData();
+        if (!mounted) return;
+        setLive(data.live);
+        setTrend(data.trend);
+        setPredictions(data.predictions);
+      } catch (loadError) {
+        if (!mounted) return;
+        setError(loadError.message || 'Something went wrong while loading occupancy data.');
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    const fastRefresh = setInterval(load, 30_000);
+    const slowRefresh = setInterval(load, 5 * 60_000);
+
+    return () => {
+      mounted = false;
+      clearInterval(fastRefresh);
+      clearInterval(slowRefresh);
+    };
   }, []);
 
-  // Refresh trend and prediction data every 5 minutes
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTrendData(generateTrendData());
-      setPredictionData(generatePredictionData());
-    }, 300000);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-            GymPulse
-          </h1>
-          <p className="mt-3 text-xl text-gray-600">
-            Real-time gym occupancy tracker
-          </p>
+    <div className="app-shell">
+      <main className="container">
+        <header>
+          <h1>GymPulse</h1>
+          <p>Know when to go in under 5 seconds.</p>
         </header>
 
-        <main>
-          <OccupancyIndicator occupancy={liveOccupancy} />
-          <TrendChart data={trendData} />
-          <PredictionChart data={predictionData} />
-        </main>
+        {loading && <div className="card">Loading live occupancy…</div>}
 
-        <footer className="mt-12 text-center text-gray-600">
-          <p>Data refreshes automatically • Updated just now</p>
-        </footer>
-      </div>
+        {!loading && error && (
+          <div className="card error" role="alert">
+            {error} Please retry in a moment.
+          </div>
+        )}
+
+        {!loading && !error && live && (
+          <>
+            <StatusCard live={live} />
+            <div className="grid">
+              <TrendChartCard trend={trend} />
+              <PredictionChartCard predictions={predictions} />
+            </div>
+            <div className="recommendation">{bestVisitText}</div>
+          </>
+        )}
+      </main>
     </div>
   );
-};
+}
 
 export default App;

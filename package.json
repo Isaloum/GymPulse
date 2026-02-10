@@ -2,11 +2,13 @@
   "name": "gym-pulse",
   "version": "1.0.0",
   "description": "Real-time gym occupancy tracker",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test src/utils.node.test.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
