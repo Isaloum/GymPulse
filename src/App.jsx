@@ -16,8 +16,8 @@ import {
   CartesianGrid,
   Cell,
   Legend,
-  Line,
   main
+  Line,
   LineChart,
   ResponsiveContainer,
   Tooltip,
@@ -32,8 +32,8 @@ import {
   codex/build-gympulse-real-time-occupancy-tracker-r63qxw
   generateWeeklyHeatmap,
   codex/build-gympulse-real-time-occupancy-tracker-6g1grv
-  generateWeeklyHeatmap,
   main
+  generateWeeklyHeatmap,
   getBestVisitWindow,
   getConfidenceLabel,
   isDataStale,
@@ -44,7 +44,7 @@ const OCCUPANCY_COLORS = {
   Moderate: '#2563eb',
   High: '#dc2626',
 };
-codex/build-gympulse-real-time-occupancy-tracker-6g1grv
+
 const HEATMAP_STEPS = ['#ecfeff', '#cffafe', '#67e8f9', '#22d3ee', '#0891b2'];
 codex/build-gympulse-real-time-occupancy-tracker-r63qxw
 const HEATMAP_STEPS = ['#ecfeff', '#cffafe', '#67e8f9', '#22d3ee', '#0891b2'];
@@ -59,7 +59,6 @@ const getHeatmapColor = (value) => {
 
 const fetchDashboardData = async (location) => {
   await new Promise((resolve) => setTimeout(resolve, 450));
-
   codex/build-gympulse-real-time-occupancy-tracker-r63qxw
   if (Math.random() < 0.04) {
     throw new Error('Unable to reach sensor network.');
@@ -77,7 +76,6 @@ main
     throw new Error('Unable to reach sensor network.');
   }
 
-codex/build-gympulse-real-time-occupancy-tracker-6g1grv
   const live = generateLiveOccupancy();
   if (location === 'Downtown') {
     live.percentage = Math.min(100, live.percentage + 12);
@@ -350,6 +348,7 @@ function App() {
       clearInterval(refresh);
     };
   }, [location]);
+  codex/build-gympulse-real-time-occupancy-tracker-r63qxw
   return {
     live: generateLiveOccupancy(),
     trend: generateTrendData(),
@@ -520,7 +519,6 @@ function App() {
     };
   }, []);
   main
-
   return (
     <div className="app-shell">
       <main className="container">
@@ -541,7 +539,6 @@ function App() {
             </select>
           </label>
   codex/build-gympulse-real-time-occupancy-tracker-r63qxw
-
         <header>
           <h1>GymPulse</h1>
           <p>Know when to go in under 5 seconds.</p>
@@ -568,6 +565,7 @@ function App() {
  codex/build-gympulse-real-time-occupancy-tracker-6g1grv
             <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
  main
+            <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
             <div className="recommendation">{bestVisitText}</div>
           </>
         )}
