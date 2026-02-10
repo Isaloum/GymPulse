@@ -24,6 +24,60 @@ import {
   isDataStale,
 } from './utils';
 
+// Error Boundary: Catches component errors and displays a friendly message
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('GymPulse encountered an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="app-shell">
+          <main className="container">
+            <div className="card error" role="alert">
+              <h2>Something went wrong</h2>
+              <p>GymPulse encountered an unexpected error. Please refresh the page.</p>
+              <details style={{ marginTop: '0.5rem', fontSize: '0.85rem', color: '#666' }}>
+                <summary>Error details</summary>
+                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                  {this.state.error?.toString()}
+                </pre>
+              </details>
+              <button
+                onClick={() => window.location.reload()}
+                style={{
+                  marginTop: '1rem',
+                  padding: '0.6rem 1.2rem',
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontSize: '0.95rem',
+                }}
+              >
+                Reload page
+              </button>
+            </div>
+          </main>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 const OCCUPANCY_COLORS = {
   Low: '#059669',
   Moderate: '#2563eb',
@@ -218,6 +272,8 @@ function App() {
   return (
     <div className="app-shell">
       <main className="container">
+        <a href="#main-content" className="skip-link">Skip to main content</a>
+
         <header className="title-row">
           <div>
             <h1>GymPulse</h1>
@@ -225,7 +281,11 @@ function App() {
           </div>
           <label className="location-picker">
             Location
-            <select value={location} onChange={(event) => setLocation(event.target.value)}>
+            <select 
+              value={location} 
+              onChange={(event) => setLocation(event.target.value)}
+              aria-label="Select gym location"
+            >
               <option>Main Street</option>
               <option>Downtown</option>
               <option>West End</option>
@@ -233,28 +293,41 @@ function App() {
           </label>
         </header>
 
-        {loading && <div className="card">Loading live occupancy…</div>}
-
-        {!loading && error && (
-          <div className="card error" role="alert">
-            {error} Please retry in a moment.
-          </div>
-        )}
-
-        {!loading && !error && live && (
-          <>
-            <StatusCard live={live} />
-            <div className="grid">
-              <TrendChartCard trend={trend} />
-              <PredictionChartCard predictions={predictions} />
+        <div id="main-content">
+          {loading && (
+            <div className="card" role="status" aria-live="polite" aria-label="Loading occupancy data">
+              <div className="loading">Loading live occupancy…</div>
             </div>
-            <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
-            <div className="recommendation">{bestVisitText}</div>
-          </>
-        )}
+          )}
+
+          {!loading && error && (
+            <div className="card error" role="alert" aria-label="Error loading data">
+              {error} Please retry in a moment.
+            </div>
+          )}
+
+          {!loading && !error && live && (
+            <>
+              <StatusCard live={live} />
+              <div className="grid">
+                <TrendChartCard trend={trend} />
+                <PredictionChartCard predictions={predictions} />
+              </div>
+              <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
+              <div className="recommendation" role="status" aria-live="polite">{bestVisitText}</div>
+            </>
+          )}
+        </div>
       </main>
     </div>
   );
 }
 
-export default App;
+// Wrap the App with ErrorBoundary for production safety
+export default function AppWithErrorBoundary() {
+  return (
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  );
+}

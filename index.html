@@ -2,12 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GymPulse: Real-time gym occupancy tracker. Know when to go in under 5 seconds with live crowd levels and peak time predictions." />
+  <meta name="theme-color" content="#3b82f6" />
+  <meta name="color-scheme" content="light" />
+  
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="GymPulse - Real-time Gym Occupancy Tracker" />
+  <meta property="og:description" content="Check gym crowd levels and peak times before you go." />
+  
+  <!-- Apple specific -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GymPulse" />
+  
+  <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
   <title>GymPulse - Real-time Gym Occupancy Tracker</title>
   <script type="module" src="/src/main.jsx"></script>
 </head>
 <body>
   <div id="root"></div>
+  <noscript>
+    <p>Enable JavaScript to run GymPulse. This app requires JavaScript to display real-time gym occupancy data.</p>
+  </noscript>
 </body>
 </html>

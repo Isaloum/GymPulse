@@ -12,6 +12,32 @@ body {
   margin: 0;
 }
 
+/* Accessibility: Ensure focus is visible everywhere */
+:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Skip to main content link (hidden by default, visible on focus) */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #3b82f6;
+  color: white;
+  padding: 8px;
+  text-decoration: none;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
 .app-shell {
   min-height: 100vh;
   background: linear-gradient(160deg, #eff6ff 0%, #e0f2fe 45%, #ecfeff 100%);
@@ -55,6 +81,18 @@ header p {
   background: #fff;
   padding: 0.55rem 0.65rem;
   font-size: 0.95rem;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.location-picker select:hover {
+  border-color: #2563eb;
+}
+
+.location-picker select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-color: #3b82f6;
 }
 
 .card {
@@ -65,11 +103,19 @@ header p {
   margin-top: 1rem;
 }
 
+/* Mobile-first: smaller padding on mobile */
+@media (max-width: 640px) {
+  .card {
+    padding: 1rem;
+  }
+}
+
 .card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 h2 {
@@ -82,6 +128,13 @@ h2 {
   gap: 1rem;
   margin-top: 1rem;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* Mobile optimization: full width on small screens */
+@media (max-width: 640px) {
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .big-number {
@@ -100,6 +153,7 @@ h2 {
 .subtle {
   color: #64748b;
   font-size: 0.95rem;
+  margin: 0.25rem 0;
 }
 
 .badge {
@@ -107,6 +161,8 @@ h2 {
   font-size: 0.85rem;
   padding: 0.35rem 0.75rem;
   font-weight: 600;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-ok {
@@ -136,12 +192,14 @@ h2 {
   border-radius: 999px;
   background: #e2e8f0;
   overflow: hidden;
+  /* Accessibility: Add aria-label on the meter span itself */
 }
 
 .meter span {
   height: 100%;
   background: linear-gradient(90deg, #38bdf8, #3b82f6, #1d4ed8);
   display: block;
+  transition: width 0.3s ease-out;
 }
 
 .grid {
@@ -150,9 +208,16 @@ h2 {
   gap: 1rem;
 }
 
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .heatmap {
   margin-top: 1rem;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .heatmap-header,
@@ -162,6 +227,14 @@ h2 {
   gap: 0.35rem;
   margin-bottom: 0.35rem;
   align-items: center;
+}
+
+@media (max-width: 640px) {
+  .heatmap-header,
+  .heatmap-row {
+    grid-template-columns: 50px repeat(6, minmax(45px, 1fr));
+    font-size: 0.8rem;
+  }
 }
 
 .day-label {
@@ -176,6 +249,14 @@ h2 {
   font-size: 0.78rem;
   font-weight: 600;
   color: #0f172a;
+  transition: transform 0.2s;
+}
+
+/* Interactive: slightly enlarge on hover for desktop */
+@media (hover: hover) {
+  .heat-cell:hover {
+    transform: scale(1.05);
+  }
 }
 
 .recommendation {
@@ -185,10 +266,60 @@ h2 {
   background: #dbeafe;
   border: 1px solid #93c5fd;
   font-weight: 600;
+  /* Accessibility: Good contrast ratio */
+  color: #1e40af;
 }
 
 .error {
   color: #991b1b;
   background: #fef2f2;
   border: 1px solid #fecaca;
+}
+
+button {
+  min-height: 44px; /* Accessibility: Touch target minimum */
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  header h1 {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  h2 {
+    font-size: 1rem;
+  }
+
+  .title-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .location-picker select {
+    min-width: 100%;
+  }
+}
+
+/* Loading state animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.card:has(.loading) {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
