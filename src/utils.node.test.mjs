@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import {
   deriveOccupancyLevel,
   generatePredictionData,
+codex/build-gympulse-real-time-occupancy-tracker-dyko17
+  generateWeeklyHeatmap,
 codex/build-gympulse-real-time-occupancy-tracker-r63qxw
   generateWeeklyHeatmap,
   codex/build-gympulse-real-time-occupancy-tracker-6g1grv
@@ -32,6 +34,8 @@ test('isDataStale flags delayed snapshots', () => {
   assert.equal(isDataStale(freshDate), false);
 });
 
+codex/build-gympulse-real-time-occupancy-tracker-dyko17
+test('best visit window returns lowest predicted slot range', () => {
 codex/build-gympulse-real-time-occupancy-tracker-r63qxw
 test('best visit window returns lowest predicted slot range', () => {
 codex/build-gympulse-real-time-occupancy-tracker-6g1grv
@@ -43,6 +47,8 @@ main
     { time: '04 PM', predicted: 30 },
     { time: '05 PM', predicted: 48 },
   ]);
+codex/build-gympulse-real-time-occupancy-tracker-dyko17
+  assert.equal(recommendation, 'Best time to go: 04 PM–05 PM');
 codex/build-gympulse-real-time-occupancy-tracker-r63qxw
   assert.equal(recommendation, 'Best time to go: 04 PM–05 PM');
 codex/build-gympulse-real-time-occupancy-tracker-6g1grv
@@ -59,6 +65,7 @@ test('prediction generator produces bounded values', () => {
     assert.ok(row.upperBound <= 100);
   });
 });
+ codex/build-gympulse-real-time-occupancy-tracker-dyko17
  codex/build-gympulse-real-time-occupancy-tracker-r63qxw
  codex/build-gympulse-real-time-occupancy-tracker-6g1grv
 main
@@ -68,6 +75,6 @@ test('weekly heatmap generator creates all days and occupancy slots', () => {
   assert.equal(heatmap.length, 7);
   assert.ok(heatmap.every((row) => ['6a', '9a', '12p', '3p', '6p', '9p'].every((slot) => row[slot] >= 0 && row[slot] <= 100)));
 });
+codex/build-gympulse-real-time-occupancy-tracker-dyko17
 codex/build-gympulse-real-time-occupancy-tracker-r63qxw
 main
-
