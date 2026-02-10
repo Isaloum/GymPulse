@@ -23,6 +23,10 @@ export const isDataStale = (lastUpdatedAt, staleAfterMinutes = 5) => {
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+ codex/build-gympulse-real-time-occupancy-tracker-6g1grv
+const formatHour = (date) => date.toLocaleTimeString([], { hour: '2-digit' });
+
+main
 export const generateLiveOccupancy = () => {
   const percentage = Math.floor(Math.random() * 100);
   const estimatedHeadcount = Math.round((percentage / 100) * 120);
@@ -42,7 +46,10 @@ export const generateTrendData = () => {
     const hourOffset = 23 - index;
     const timestamp = new Date(Date.now() - hourOffset * 60 * 60 * 1000);
     return {
+ codex/build-gympulse-real-time-occupancy-tracker-6g1grv
+      time: formatHour(timestamp),
       time: timestamp.toLocaleTimeString([], { hour: '2-digit' }),
+ main
       occupancy: Math.floor(Math.random() * 100),
     };
   });
@@ -55,7 +62,10 @@ export const generatePredictionData = () => {
     const spread = Math.floor(Math.random() * 18) + 8;
 
     return {
+      codex/build-gympulse-real-time-occupancy-tracker-6g1grv
+      time: formatHour(timestamp),
       time: timestamp.toLocaleTimeString([], { hour: '2-digit' }),
+ main
       predicted,
       lowerBound: clamp(predicted - spread, 0, 100),
       upperBound: clamp(predicted + spread, 0, 100),
@@ -64,10 +74,37 @@ export const generatePredictionData = () => {
   });
 };
 
+ codex/build-gympulse-real-time-occupancy-tracker-6g1grv
+export const generateWeeklyHeatmap = () => {
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const hours = ['6a', '9a', '12p', '3p', '6p', '9p'];
+
+  return days.map((day, dayIndex) => ({
+    day,
+    ...hours.reduce((acc, hour, hourIndex) => {
+      const base = 20 + ((dayIndex + hourIndex) % 5) * 15;
+      acc[hour] = clamp(base + Math.floor(Math.random() * 25), 0, 100);
+      return acc;
+    }, {}),
+  }));
+};
+
+export const getBestVisitWindow = (predictionData) => {
+  if (!predictionData.length) return 'No forecast available yet';
+
+  const bestIndex = predictionData.reduce((best, current, idx, arr) =>
+    current.predicted < arr[best].predicted ? idx : best,
+  0);
+
+  const start = predictionData[bestIndex]?.time;
+  const end = predictionData[bestIndex + 1]?.time;
+
+  return end ? `Best time to go: ${start}–${end}` : `Best time to go: ${start}`;
 export const getBestVisitWindow = (predictionData) => {
   if (!predictionData.length) return 'No forecast available yet';
 
   const sorted = [...predictionData].sort((a, b) => a.predicted - b.predicted);
   const best = sorted[0];
   return `Best time to go: ${best.time}`;
+main
 };
