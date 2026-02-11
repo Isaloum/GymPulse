@@ -186,7 +186,7 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.5215, lng: -73.5783 },
   },
   
-  // World Gym Québec (Franchise/licensed brand model)
+  // World Gym Québec (Franchise/licensed brand model - multiple clubs)
   {
     id: 'mtl-world-gym-1',
     name: 'World Gym Québec Downtown',
@@ -195,6 +195,15 @@ export const QUEBEC_GYMS = [
     address: '1500 Rue Crescent',
     province: PROVINCES.QC,
     coordinates: { lat: 45.5044, lng: -73.5748 },
+  },
+  {
+    id: 'mtl-world-gym-2',
+    name: 'World Gym Québec West Island',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Montreal',
+    address: '4950 Rue Jean-Talon O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5248, lng: -73.6473 },
   },
 
   // ===== MONTREAL - Major National Chains =====
@@ -420,6 +429,15 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 46.7909, lng: -71.2265 },
   },
+  {
+    id: 'qc-world-gym-1',
+    name: 'World Gym Québec Sainte-Foy',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Quebec City',
+    address: '2750 Boulevard Laurier',
+    province: PROVINCES.QC,
+    coordinates: { lat: 46.7915, lng: -71.2275 },
+  },
 
   // National chains in Quebec City
   {
@@ -515,6 +533,15 @@ export const QUEBEC_GYMS = [
     address: '1800 Rue King Ouest',
     province: PROVINCES.QC,
     coordinates: { lat: 45.4015, lng: -71.8947 },
+  },
+  {
+    id: 'sherbrooke-world-gym-1',
+    name: 'World Gym Québec Sherbrooke',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Sherbrooke',
+    address: '1900 Rue King Ouest',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4015, lng: -71.8920 },
   },
   {
     id: 'sherbrooke-club-six-1',
