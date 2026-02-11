@@ -479,6 +479,15 @@ export const QUEBEC_GYMS = [
 
   // ===== GATINEAU (National Capital Region) - Western QC presence =====
   {
+    id: 'gatineau-world-gym-1',
+    name: 'World Gym Québec Gatineau',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Gatineau',
+    address: '180 Rue de la Cathédrale',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4396, lng: -75.7380 },
+  },
+  {
     id: 'gatineau-goodlife-1',
     name: 'GoodLife Fitness Hull',
     brand: GYM_BRANDS.GOODLIFE_FITNESS,
@@ -582,6 +591,15 @@ export const QUEBEC_GYMS = [
 
   // ===== LAVAL =====
   {
+    id: 'laval-world-gym-1',
+    name: 'World Gym Québec Laval',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Laval',
+    address: '3600 Boulevard Chomedey',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5732, lng: -73.7395 },
+  },
+  {
     id: 'laval-nautilus-1',
     name: 'Nautilus Plus Chomedey',
     brand: GYM_BRANDS.NAUTILUS_PLUS,
@@ -629,6 +647,15 @@ export const QUEBEC_GYMS = [
 
   // ===== LONGUEUIL =====
   {
+    id: 'longueuil-world-gym-1',
+    name: 'World Gym Québec Longueuil',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Longueuil',
+    address: '200 Rue Saint-Laurent',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5167, lng: -73.5035 },
+  },
+  {
     id: 'longueuil-goodlife-1',
     name: 'GoodLife Fitness Longueuil',
     brand: GYM_BRANDS.GOODLIFE_FITNESS,
@@ -666,6 +693,15 @@ export const QUEBEC_GYMS = [
   },
 
   // ===== ADDITIONAL MAJOR CITIES =====
+  {
+    id: 'brossard-world-gym-1',
+    name: 'World Gym Québec Brossard',
+    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
+    city: 'Brossard',
+    address: '7950 Boulevard Taschereau',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4595, lng: -73.4800 },
+  },
   {
     id: 'brossard-planet-1',
     name: 'Planet Fitness Brossard',
