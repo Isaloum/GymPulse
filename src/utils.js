@@ -92,3 +92,40 @@ export const getBestVisitWindow = (predictionData) => {
 
   return end ? `Best time to go: ${start}–${end}` : `Best time to go: ${start}`;
 };
+
+/**
+ * Aggregate user check-ins to estimate real occupancy
+ * @param {string} gymId - The gym ID to check
+ * @param {Array} checkIns - Array of check-in objects {gymId, timestamp, userId}
+ * @returns {Object} - Aggregated occupancy data with real check-in count
+ */
+export const aggregateCheckIns = (gymId, checkIns) => {
+  const now = Date.now();
+  const fifteenMinutesAgo = now - 15 * 60 * 1000;
+  
+  // Count recent check-ins for this gym
+  const recentCheckIns = checkIns.filter(
+    c => c.gymId === gymId && c.timestamp > fifteenMinutesAgo
+  );
+  
+  const checkInCount = recentCheckIns.length;
+  
+  if (checkInCount === 0) {
+    return {
+      hasRealData: false,
+      checkInCount: 0,
+      adjustedPercentage: null,
+    };
+  }
+  
+  // Estimate occupancy based on check-ins
+  // Assume: 100 member capacity, 10 check-ins = ~30% occupancy (3x multiplier)
+  // This is a rough heuristic - can be refined with real gym capacity data
+  const estimatedPercentage = Math.min(100, checkInCount * 3);
+  
+  return {
+    hasRealData: true,
+    checkInCount,
+    adjustedPercentage: estimatedPercentage,
+  };
+};

@@ -22,6 +22,7 @@ import {
   getBestVisitWindow,
   getConfidenceLabel,
   isDataStale,
+  aggregateCheckIns,
 } from './utils';
 import {
   PROVINCES,
@@ -101,7 +102,7 @@ const getHeatmapColor = (value) => {
   return HEATMAP_STEPS[4];
 };
 
-const fetchDashboardData = async (gymId) => {
+const fetchDashboardData = async (gymId, checkIns = []) => {
   await new Promise((resolve) => setTimeout(resolve, 450));
   
   if (Math.random() < 0.04) {
@@ -111,8 +112,23 @@ const fetchDashboardData = async (gymId) => {
   const gym = getGymById(gymId);
   const gymName = gym ? gym.name : 'Unknown Gym';
   
-  // Generate location-aware occupancy data
+  // Generate base occupancy data
   const live = generateLiveOccupancy();
+  
+  // Aggregate check-in data for this gym
+  const checkInData = aggregateCheckIns(gymId, checkIns);
+  
+  // Blend real check-in data with mock data
+  if (checkInData.hasRealData) {
+    // Weight: 40% check-ins + 60% mock (initial blend)
+    live.percentage = Math.round(
+      0.4 * checkInData.adjustedPercentage + 0.6 * live.percentage
+    );
+    live.confidence = Math.min(100, live.confidence + 15); // Higher confidence with real data
+    live.checkInCount = checkInData.checkInCount;
+  } else {
+    live.checkInCount = 0;
+  }
   
   // Adjust occupancy based on gym brand/location (peaks at different times)
   if (gym?.brand.includes('Anytime')) {
@@ -122,6 +138,8 @@ const fetchDashboardData = async (gymId) => {
     live.percentage = Math.min(100, live.percentage + 10); // Downtown is busier
   }
   
+  // Re-derive level after percentage adjustments
+  live.level = live.percentage < 35 ? 'Low' : live.percentage < 75 ? 'Moderate' : 'High';
   live.gymName = gymName;
   live.gymId = gymId;
 
@@ -133,18 +151,24 @@ const fetchDashboardData = async (gymId) => {
   };
 };
 
-const FreshnessBadge = ({ lastUpdatedAt }) => {
+const FreshnessBadge = ({ lastUpdatedAt, checkInCount }) => {
   const stale = isDataStale(lastUpdatedAt);
   const date = new Date(lastUpdatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  const hasRealData = checkInCount > 0;
+  const badgeClass = hasRealData ? 'badge-ok' : (stale ? 'badge-warn' : 'badge-ok');
+  const badgeText = hasRealData 
+    ? `${checkInCount} check-in${checkInCount > 1 ? 's' : ''} • ${date}`
+    : (stale ? 'Data delayed' : 'Live data') + ` • Updated ${date}`;
 
   return (
-    <div className={`badge ${stale ? 'badge-warn' : 'badge-ok'}`} role="status" aria-live="polite">
-      {stale ? 'Data delayed' : 'Live data'} • Updated {date}
+    <div className={`badge ${badgeClass}`} role="status" aria-live="polite">
+      {badgeText}
     </div>
   );
 };
 
-const StatusCard = ({ live }) => {
+const StatusCard = ({ live, onCheckIn, checkInSuccess }) => {
   const levelColor = OCCUPANCY_COLORS[live.level] || '#334155';
 
   return (
@@ -154,7 +178,10 @@ const StatusCard = ({ live }) => {
           <h2>Current occupancy</h2>
           <p className="subtle" style={{ margin: '0.3rem 0 0 0' }}>{live.gymName}</p>
         </div>
-        <FreshnessBadge lastUpdatedAt={live.lastUpdatedAt} />
+        <FreshnessBadge 
+          lastUpdatedAt={live.lastUpdatedAt} 
+          checkInCount={live.checkInCount || 0}
+        />
       </div>
 
       <div className="status-grid">
@@ -172,6 +199,44 @@ const StatusCard = ({ live }) => {
           </div>
           <p className="subtle">{live.confidence}% confidence</p>
         </div>
+      </div>
+      
+      <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+        <button 
+          className="check-in-button"
+          onClick={onCheckIn}
+          aria-label="Check in at this gym"
+          style={{
+            padding: '0.75rem 2rem',
+            fontSize: '1rem',
+            fontWeight: '600',
+            color: 'white',
+            backgroundColor: '#2563eb',
+            border: 'none',
+            borderRadius: '0.5rem',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
+          onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}
+        >
+          I'm Here
+        </button>
+        
+        {checkInSuccess && (
+          <p 
+            style={{
+              marginTop: '0.75rem',
+              fontSize: '0.9rem',
+              color: '#059669',
+              fontWeight: '500'
+            }}
+            role="status" 
+            aria-live="polite"
+          >
+            {checkInSuccess}
+          </p>
+        )}
       </div>
     </section>
   );
@@ -260,10 +325,60 @@ function App() {
   const [province, setProvince] = useState('Quebec');
   const [city, setCity] = useState('Montreal');
   const [gymId, setGymId] = useState('mtl-anytime-1'); // Initial gym
+  
+  // Check-in state
+  const [checkIns, setCheckIns] = useState(() => {
+    const saved = localStorage.getItem('gymPulseCheckIns');
+    if (!saved) return [];
+    try {
+      const parsed = JSON.parse(saved);
+      // Remove check-ins older than 24 hours
+      const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      return parsed.filter(c => c.timestamp > dayAgo);
+    } catch {
+      return [];
+    }
+  });
+  const [userId] = useState(() => {
+    let id = localStorage.getItem('gymPulseUserId');
+    if (!id) {
+      id = `user-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+      localStorage.setItem('gymPulseUserId', id);
+    }
+    return id;
+  });
+  const [checkInSuccess, setCheckInSuccess] = useState('');
 
   // Derived state
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
   const gyms = useMemo(() => getGymsByProvinceAndCity(province, city), [province, city]);
+  
+  // Check-in handler
+  const handleCheckIn = () => {
+    const now = Date.now();
+    const hourAgo = now - 60 * 60 * 1000;
+    
+    // Prevent spam: max 1 check-in per gym per hour
+    const recentCheckIn = checkIns.find(
+      c => c.gymId === gymId && c.timestamp > hourAgo
+    );
+    
+    if (recentCheckIn) {
+      const minutesRemaining = Math.ceil((recentCheckIn.timestamp + 60 * 60 * 1000 - now) / 60000);
+      setCheckInSuccess(`Already checked in. Try again in ${minutesRemaining} min.`);
+      setTimeout(() => setCheckInSuccess(''), 3000);
+      return;
+    }
+    
+    const newCheckIn = { gymId, timestamp: now, userId };
+    const updated = [...checkIns, newCheckIn];
+    setCheckIns(updated);
+    localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
+    
+    const gym = getGymById(gymId);
+    setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'}`);
+    setTimeout(() => setCheckInSuccess(''), 3000);
+  };
   
   // Reset city when province changes
   useEffect(() => {
@@ -289,7 +404,7 @@ function App() {
     const load = async () => {
       try {
         setError('');
-        const data = await fetchDashboardData(gymId);
+        const data = await fetchDashboardData(gymId, checkIns);
         if (!mounted) return;
         setLive(data.live);
         setTrend(data.trend);
@@ -312,7 +427,7 @@ function App() {
       mounted = false;
       clearInterval(refresh);
     };
-  }, [gymId]);
+  }, [gymId, checkIns]);
 
   return (
     <div className="app-shell">
@@ -385,7 +500,11 @@ function App() {
 
           {!loading && !error && live && (
             <>
-              <StatusCard live={live} />
+              <StatusCard 
+                live={live} 
+                onCheckIn={handleCheckIn}
+                checkInSuccess={checkInSuccess}
+              />
               <div className="grid">
                 <TrendChartCard trend={trend} />
                 <PredictionChartCard predictions={predictions} />
