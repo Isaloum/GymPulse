@@ -61,7 +61,7 @@ export const GYM_BRANDS = {
   PILATES_PLUS: 'Pilates Plus',
   
   // Specialized Training
-  PERSONAL_TRAINING_+: 'Personal Training +',
+  PERSONAL_TRAINING_PLUS: 'Personal Training +',
   BOXING_CANADA: 'Boxing Canada',
   MMA_CANADA: 'MMA Canada',
   MARTIAL_ARTS: 'Martial Arts Studio',
@@ -76,7 +76,7 @@ export const GYM_BRANDS = {
   STEVE_NASH_FITNESS: 'Steve Nash Fitness',
   MOVATI: 'Movati Athletic Club',
   LA_FITNESS: 'LA Fitness',
-  24_HOUR_FITNESS: '24 Hour Fitness',
+  TWENTY_FOUR_HOUR_FITNESS: '24 Hour Fitness',
   
   // Boutique/Premium
   SOLIDCORE: 'SolidCore',
