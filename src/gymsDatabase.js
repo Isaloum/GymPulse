@@ -904,6 +904,83 @@ export const getGymsByProvince = (province) => {
 };
 
 /**
+ * Gym Capacity Database - Realistic member capacity by location
+ * Capacity varies by gym size, brand tier, and location
+ * Budget chains: 80-100 | Mid-tier: 120-150 | Premium: 40-60 | Large: 150-180
+ */
+export const GYM_CAPACITY = {
+  // Montreal Éconofitness (budget, high capacity)
+  'mtl-econofitness-1': 95,
+  'mtl-econofitness-2': 90,
+  'mtl-econofitness-3': 85,
+  'mtl-nautilus-1': 140,
+  'mtl-nautilus-2': 130,
+  'mtl-energie-1': 135,
+  'mtl-energie-2': 125,
+  'mtl-world-gym-1': 160,
+  'mtl-world-gym-2': 155,
+  'mtl-goodlife-1': 180,
+  'mtl-goodlife-2': 175,
+  'mtl-planet-1': 150,
+  'mtl-anytime-1': 110,
+  'mtl-anytime-2': 105,
+  'mtl-ymca-1': 200,
+  'mtl-crunch-1': 120,
+  'mtl-orangetheory-1': 50,
+  'mtl-orangetheory-2': 45,
+  'mtl-f45-1': 40,
+  'mtl-rumble-1': 45,
+  'mtl-crossfit-1': 55,
+  'mtl-fit4less-1': 80,
+  'mtl-moksha-1': 50,
+  'mtl-pilates-1': 35,
+  'mtl-barre3-1': 40,
+  'mtl-curves-1': 60,
+  'mtl-elite-1': 75,
+  'qc-econofitness-1': 90,
+  'qc-nautilus-1': 130,
+  'qc-energie-1': 125,
+  'qc-world-gym-1': 155,
+  'qc-goodlife-1': 170,
+  'qc-anytime-1': 100,
+  'qc-ymca-1': 180,
+  'qc-orangetheory-1': 48,
+  'gatineau-world-gym-1': 140,
+  'gatineau-goodlife-1': 160,
+  'gatineau-anytime-1': 95,
+  'gatineau-fit4less-1': 75,
+  'gatineau-ymca-1': 170,
+  'gatineau-f45-1': 38,
+  'sherbrooke-econofitness-1': 85,
+  'sherbrooke-world-gym-1': 145,
+  'sherbrooke-club-six-1': 110,
+  'sherbrooke-ymca-1': 160,
+  'sherbrooke-anytime-1': 100,
+  'sherbrooke-energie-1': 120,
+  'laval-world-gym-1': 150,
+  'laval-nautilus-1': 135,
+  'laval-energie-1': 128,
+  'laval-econofitness-1': 88,
+  'laval-goodlife-1': 175,
+  'laval-anytime-1': 108,
+  'longueuil-world-gym-1': 155,
+  'longueuil-goodlife-1': 168,
+  'longueuil-crunch-1': 115,
+  'longueuil-anytime-1': 105,
+  'longueuil-f45-1': 42,
+  'brossard-world-gym-1': 152,
+  'brossard-planet-1': 155,
+  'brossard-orangetheory-1': 46,
+};
+
+/**
+ * Get gym capacity by ID
+ * @param {string} gymId - The gym ID
+ * @returns {number} - Gym capacity (default 120 if not found)
+ */
+export const getGymCapacity = (gymId) => GYM_CAPACITY[gymId] || 120;
+
+/**
  * Get all cities in a province
  */
 export const getCitiesByProvince = (province) => {

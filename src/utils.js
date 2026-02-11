@@ -97,9 +97,10 @@ export const getBestVisitWindow = (predictionData) => {
  * Aggregate user check-ins to estimate real occupancy
  * @param {string} gymId - The gym ID to check
  * @param {Array} checkIns - Array of check-in objects {gymId, timestamp, userId}
+ * @param {Object} gym - Gym object with capacity property
  * @returns {Object} - Aggregated occupancy data with real check-in count
  */
-export const aggregateCheckIns = (gymId, checkIns) => {
+export const aggregateCheckIns = (gymId, checkIns, gym = null) => {
   const now = Date.now();
   const fifteenMinutesAgo = now - 15 * 60 * 1000;
   
@@ -118,15 +119,19 @@ export const aggregateCheckIns = (gymId, checkIns) => {
     };
   }
   
-  // Estimate occupancy based on check-ins
-  // Assume: 100 member capacity, 10 check-ins = ~30% occupancy (3x multiplier)
-  // This is a rough heuristic - can be refined with real gym capacity data
-  const estimatedPercentage = Math.min(100, checkInCount * 3);
+  // Use real gym capacity if available, otherwise default to 100
+  const capacity = gym?.capacity || 100;
+  
+  // Estimate: assume 30% of people check in (adoption rate)
+  // If 10 people checked in and adoption is 30%, actual attendance ~= 33 people
+  const estimatedActualCount = Math.round(checkInCount / 0.3);
+  const estimatedPercentage = Math.min(100, Math.round((estimatedActualCount / capacity) * 100));
   
   return {
     hasRealData: true,
     checkInCount,
     adjustedPercentage: estimatedPercentage,
+    estimatedActualCount,
   };
 };
 
@@ -266,5 +271,115 @@ export const analyzeCheckIns = (checkIns, getGymById) => {
     weeklyDistribution,
     averageDistance,
     thisWeekCheckIns,
+  };
+};
+
+/**
+ * Aggregate community check-in data across all gyms
+ * @param {Array} checkIns - All check-ins from all users
+ * @param {Function} getGymById - Function to get gym details
+ * @returns {Object} - Community-wide analytics
+ */
+export const analyzeCommunityCheckIns = (checkIns, getGymById) => {
+  if (!checkIns || checkIns.length === 0) {
+    return {
+      totalCommunityCheckIns: 0,
+      activeGyms: 0,
+      topGyms: [],
+      recentCommunityActivity: [],
+      peakHours: [],
+      gymsWithActivity: [],
+      mostPopularGym: null,
+    };
+  }
+
+  const now = Date.now();
+  const last24Hours = now - 24 * 60 * 60 * 1000;
+  const last15Minutes = now - 15 * 60 * 1000;
+  const recentCheckIns = checkIns.filter(c => c.timestamp > last24Hours);
+
+  // Total community check-ins (last 24 hours)
+  const totalCommunityCheckIns = recentCheckIns.length;
+
+  // Count check-ins per gym
+  const gymCheckInCounts = {};
+  const recentGymCheckIns = {}; // Last 15 minutes
+  
+  recentCheckIns.forEach(c => {
+    gymCheckInCounts[c.gymId] = (gymCheckInCounts[c.gymId] || 0) + 1;
+  });
+  
+  checkIns.filter(c => c.timestamp > last15Minutes).forEach(c => {
+    recentGymCheckIns[c.gymId] = (recentGymCheckIns[c.gymId] || 0) + 1;
+  });
+
+  // Active gyms (with at least 1 check-in in last 24 hours)
+  const activeGyms = Object.keys(gymCheckInCounts).length;
+
+  // Gyms with activity details
+  const gymsWithActivity = Object.entries(gymCheckInCounts)
+    .map(([gymId, count]) => {
+      const gym = getGymById(gymId);
+      if (!gym) return null;
+      
+      const recentCount = recentGymCheckIns[gymId] || 0;
+      const capacity = gym.capacity || 100;
+      const estimatedActual = Math.round(recentCount / 0.3); // 30% adoption rate
+      const estimatedOccupancy = Math.min(100, Math.round((estimatedActual / capacity) * 100));
+      
+      return {
+        gym,
+        gymId,
+        recentCheckIns: recentCount,
+        last24HoursCheckIns: count,
+        capacity,
+        estimatedOccupancy,
+      };
+    })
+    .filter(Boolean);
+
+  // Most popular gym right now (highest recent check-ins)
+  const mostPopularGym = gymsWithActivity.length > 0
+    ? gymsWithActivity.sort((a, b) => b.recentCheckIns - a.recentCheckIns)[0]
+    : null;
+
+  // Top 5 most active gyms (last 24 hours)
+  const topGyms = [...gymsWithActivity]
+    .sort((a, b) => b.last24HoursCheckIns - a.last24HoursCheckIns)
+    .slice(0, 5);
+
+  // Recent community activity (last 20 check-ins)
+  const recentCommunityActivity = [...recentCheckIns]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 20)
+    .map(c => ({
+      ...c,
+      gym: getGymById(c.gymId),
+      date: new Date(c.timestamp),
+    }))
+    .filter(item => item.gym);
+
+  // Peak hours (hourly distribution for last 24 hours)
+  const hourlyActivity = Array(24).fill(0);
+  recentCheckIns.forEach(c => {
+    const hour = new Date(c.timestamp).getHours();
+    hourlyActivity[hour]++;
+  });
+
+  // Find top 3 peak hours
+  const peakHours = hourlyActivity
+    .map((count, hour) => ({ hour, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
+    .filter(h => h.count > 0);
+
+  return {
+    totalCommunityCheckIns,
+    activeGyms,
+    topGyms,
+    recentCommunityActivity,
+    peakHours,
+    gymsWithActivity,
+    mostPopularGym,
   };
 };

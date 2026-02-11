@@ -26,6 +26,7 @@ import {
   calculateDistance,
   getUserLocation,
   analyzeCheckIns,
+  analyzeCommunityCheckIns,
 } from './utils';
 import {
   PROVINCES,
@@ -33,6 +34,7 @@ import {
   getCitiesByProvince,
   getGymsByProvinceAndCity,
   getGymById,
+  getGymCapacity,
 } from './gymsDatabase';
 
 // Error Boundary: Catches component errors and displays a friendly message
@@ -119,7 +121,7 @@ const fetchDashboardData = async (gymId, checkIns = []) => {
   const live = generateLiveOccupancy();
   
   // Aggregate check-in data for this gym
-  const checkInData = aggregateCheckIns(gymId, checkIns);
+  const checkInData = aggregateCheckIns(gymId, checkIns, gym);
   
   // Blend real check-in data with mock data
   if (checkInData.hasRealData) {
@@ -129,8 +131,11 @@ const fetchDashboardData = async (gymId, checkIns = []) => {
     );
     live.confidence = Math.min(100, live.confidence + 15); // Higher confidence with real data
     live.checkInCount = checkInData.checkInCount;
+    live.estimatedActualCount = checkInData.estimatedActualCount;
+    live.capacity = gym?.capacity || 100;
   } else {
     live.checkInCount = 0;
+    live.capacity = gym?.capacity || 100;
   }
   
   // Adjust occupancy based on gym brand/location (peaks at different times)
@@ -243,6 +248,91 @@ const StatusCard = ({ live, onCheckIn, checkInSuccess, checkInLoading }) => {
           </p>
         )}
       </div>
+    </section>
+  );
+};
+
+// Peak Hour Alerts Settings Component
+const AlertSettings = ({ alertPreferences, onUpdate }) => {
+  const [showSettings, setShowSettings] = useState(false);
+
+  const handleToggle = () => {
+    const updated = { ...alertPreferences, enabled: !alertPreferences.enabled };
+    onUpdate(updated);
+  };
+
+  const handleThresholdChange = (e) => {
+    const updated = { ...alertPreferences, threshold: parseInt(e.target.value, 10) };
+    onUpdate(updated);
+  };
+
+  return (
+    <section className="card" style={{ marginBottom: '1.5rem', backgroundColor: '#eff6ff' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem' }}>🔔 Peak Hour Alerts</h3>
+          <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+            Get notified when gym is {alertPreferences.enabled ? `below ${alertPreferences.threshold}%` : 'quiet'}
+          </p>
+        </div>
+        <button
+          onClick={() => setShowSettings(!showSettings)}
+          style={{
+            padding: '0.5rem 1rem',
+            fontSize: '0.85rem',
+            border: 'none',
+            borderRadius: '0.375rem',
+            cursor: 'pointer',
+            backgroundColor: 'white',
+            color: '#2563eb',
+            fontWeight: '600',
+          }}
+        >
+          {showSettings ? 'Hide' : 'Settings'}
+        </button>
+      </div>
+
+      {showSettings && (
+        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #dbeafe' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={alertPreferences.enabled}
+              onChange={handleToggle}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <span style={{ fontSize: '0.9rem' }}>Enable alerts for this gym</span>
+          </label>
+
+          {alertPreferences.enabled && (
+            <div>
+              <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+                Alert when occupancy is below:
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <input
+                  type="range"
+                  min="10"
+                  max="90"
+                  step="10"
+                  value={alertPreferences.threshold}
+                  onChange={handleThresholdChange}
+                  style={{ flex: 1 }}
+                />
+                <span style={{ 
+                  minWidth: '60px', 
+                  textAlign: 'center', 
+                  fontWeight: '600', 
+                  fontSize: '1.1rem',
+                  color: '#2563eb'
+                }}>
+                  {alertPreferences.threshold}%
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 };
@@ -443,6 +533,158 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
   );
 };
 
+// Community Stats View
+const CommunityStatsView = ({ communityStats }) => {
+  const HOURS = ['12am', '1am', '2am', '3am', '4am', '5am', '6am', '7am', '8am', '9am', '10am', '11am', 
+                  '12pm', '1pm', '2pm', '3pm', '4pm', '5pm', '6pm', '7pm', '8pm', '9pm', '10pm', '11pm'];
+
+  return (
+    <div>
+      {/* Community Overview Stats */}
+      <div className="grid" style={{ marginBottom: '1.5rem' }}>
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>Community Check-ins</p>
+          <p className="big-number" style={{ color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+            {communityStats.totalCommunityCheckIns}
+          </p>
+          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>all users</p>
+        </section>
+        
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>Gyms with Activity</p>
+          <p className="big-number" style={{ color: '#059669', margin: '0.5rem 0 0 0' }}>
+            {communityStats.gymsWithActivity.length}
+          </p>
+          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>active locations</p>
+        </section>
+        
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>Peak Hours</p>
+          <p className="big-number" style={{ color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+            {communityStats.peakHours.length > 0 
+              ? HOURS[Math.floor(communityStats.peakHours[0].hour)]
+              : 'N/A'
+            }
+          </p>
+          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>busiest time</p>
+        </section>
+      </div>
+
+      {/* Most Popular Gym */}
+      {communityStats.mostPopularGym && (
+        <section className="card" style={{ marginBottom: '1.5rem' }}>
+          <h2>🔥 Busiest Right Now</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ flex: 1 }}>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0.5rem 0' }}>
+                {communityStats.mostPopularGym.gym.brand}
+              </p>
+              <p className="subtle" style={{ margin: 0, fontSize: '0.9rem' }}>
+                {communityStats.mostPopularGym.gym.city} • {communityStats.mostPopularGym.gym.name}
+              </p>
+              <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.85rem', color: '#6b7280' }}>
+                Capacity: {communityStats.mostPopularGym.capacity} members
+              </p>
+            </div>
+            <div style={{ textAlign: 'right', minWidth: '120px' }}>
+              <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#dc2626', margin: 0 }}>
+                {communityStats.mostPopularGym.estimatedOccupancy}%
+              </p>
+              <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                occupancy
+              </p>
+              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0.5rem 0 0 0' }}>
+                {communityStats.mostPopularGym.recentCheckIns} people now
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Active Gyms Leaderboard */}
+      <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <h2>Gym Leaderboard</h2>
+        <p className="subtle" style={{ margin: '0 0 1rem 0' }}>Based on recent community check-ins</p>
+        {communityStats.gymsWithActivity.length === 0 ? (
+          <p className="subtle">No community activity yet. Be the first to check in!</p>
+        ) : (
+          <div>
+            {communityStats.gymsWithActivity
+              .sort((a, b) => b.recentCheckIns - a.recentCheckIns)
+              .slice(0, 10)
+              .map((item, idx) => (
+                <div 
+                  key={idx}
+                  style={{
+                    padding: '1rem',
+                    borderBottom: idx < Math.min(10, communityStats.gymsWithActivity.length - 1) ? '1px solid #e5e7eb' : 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: '600', margin: 0 }}>
+                      #{idx + 1} {item.gym.brand}
+                    </p>
+                    <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem' }}>
+                      {item.gym.name} • {item.gym.city}
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                    <p style={{ fontWeight: '600', margin: 0, color: '#2563eb' }}>
+                      {item.recentCheckIns}
+                    </p>
+                    <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                      recent
+                    </p>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+
+      {/* Peak Hours */}
+      <section className="card">
+        <h2>Peak Hours (Community)</h2>
+        <p className="subtle" style={{ margin: '0 0 1rem 0' }}>When most people work out</p>
+        {communityStats.peakHours.length === 0 ? (
+          <p className="subtle">Insufficient data. Check back later!</p>
+        ) : (
+          <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+            {communityStats.peakHours.map((peak, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <p style={{ minWidth: '60px', fontWeight: '600', margin: 0 }}>
+                  {HOURS[peak.hour]}
+                </p>
+                <div style={{
+                  flex: 1,
+                  height: '24px',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '0.25rem',
+                  overflow: 'hidden',
+                }}>
+                  <div 
+                    style={{
+                      height: '100%',
+                      backgroundColor: idx === 0 ? '#dc2626' : idx === 1 ? '#f97316' : '#eab308',
+                      width: `${(peak.count / Math.max(...communityStats.peakHours.map(p => p.count))) * 100}%`,
+                    }}
+                  />
+                </div>
+                <p style={{ minWidth: '40px', margin: 0, textAlign: 'right', fontSize: '0.85rem' }}>
+                  {peak.count}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
 function App() {
   const [live, setLive] = useState(null);
   const [trend, setTrend] = useState([]);
@@ -479,7 +721,7 @@ function App() {
   });
   const [checkInSuccess, setCheckInSuccess] = useState('');
   const [checkInLoading, setCheckInLoading] = useState(false);
-  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' or 'analytics'
+  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'analytics', or 'community'
 
   // Derived state
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
@@ -576,6 +818,32 @@ function App() {
 
   const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
   const analytics = useMemo(() => analyzeCheckIns(checkIns, getGymById), [checkIns]);
+  const communityStats = useMemo(() => analyzeCommunityCheckIns(checkIns, getGymById), [checkIns]);
+
+  // Update alert preferences
+  const handleUpdateAlertPreferences = (newPrefs) => {
+    const updated = { ...newPrefs, gymId };
+    setAlertPreferences(updated);
+    localStorage.setItem('gymPulseAlertPrefs', JSON.stringify(updated));
+  };
+
+  // Check for peak hour alerts
+  useEffect(() => {
+    if (!live || !alertPreferences.enabled || alertPreferences.gymId !== gymId) {
+      setShowAlert(false);
+      return;
+    }
+
+    // Show alert if occupancy is below threshold
+    if (live.percentage < alertPreferences.threshold) {
+      setShowAlert(true);
+      // Auto-hide after 5 seconds
+      const timer = setTimeout(() => setShowAlert(false), 5000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowAlert(false);
+    }
+  }, [live, alertPreferences, gymId]);
 
   useEffect(() => {
     let mounted = true;
@@ -652,6 +920,22 @@ function App() {
               >
                 Analytics
               </button>
+              <button
+                onClick={() => setActiveView('community')}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  backgroundColor: activeView === 'community' ? '#2563eb' : '#f3f4f6',
+                  color: activeView === 'community' ? 'white' : '#6b7280',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Community
+              </button>
             </div>
           </div>
           
@@ -703,7 +987,9 @@ function App() {
         </header>
 
         <div id="main-content">
-          {activeView === 'analytics' ? (
+          {activeView === 'community' ? (
+            <CommunityStatsView communityStats={communityStats} />
+          ) : activeView === 'analytics' ? (
             <AnalyticsDashboard analytics={analytics} checkIns={checkIns} />
           ) : (
             <>
@@ -721,6 +1007,50 @@ function App() {
 
               {!loading && !error && live && (
                 <>
+                  {/* Peak Hour Alert Notification */}
+                  {showAlert && (
+                    <div 
+                      style={{
+                        padding: '1rem',
+                        backgroundColor: '#d1fae5',
+                        border: '2px solid #059669',
+                        borderRadius: '0.5rem',
+                        marginBottom: '1rem',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}
+                      role="alert"
+                    >
+                      <div>
+                        <p style={{ margin: 0, fontWeight: '600', color: '#065f46' }}>
+                          🎉 Great time to visit!
+                        </p>
+                        <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.9rem', color: '#047857' }}>
+                          Gym is only {live.percentage}% full — below your {alertPreferences.threshold}% threshold
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => setShowAlert(false)}
+                        style={{
+                          padding: '0.25rem 0.75rem',
+                          fontSize: '0.85rem',
+                          border: 'none',
+                          borderRadius: '0.25rem',
+                          cursor: 'pointer',
+                          backgroundColor: '#059669',
+                          color: 'white',
+                        }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  )}
+
+                  <AlertSettings
+                    alertPreferences={alertPreferences}
+                    onUpdate={handleUpdateAlertPreferences}
+                  />
                   <StatusCard 
                     live={live} 
                     onCheckIn={handleCheckIn}
