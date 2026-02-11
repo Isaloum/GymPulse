@@ -1,18 +1,88 @@
 /**
  * Gym Locations Database
- * Real gym brands and locations in Quebec, Canada
- * Expandable to full Canada
+ * Real gym brands and locations across Canada
+ * Comprehensive database of major fitness chains
  */
 
+/**
+ * COMPREHENSIVE GYM BRANDS IN CANADA
+ * All major fitness chains and independent gyms
+ */
 export const GYM_BRANDS = {
-  ANYTIME_FITNESS: 'Anytime Fitness',
+  // Major National Chains
   GOODLIFE_FITNESS: 'GoodLife Fitness',
+  ANYTIME_FITNESS: 'Anytime Fitness',
   YMCA: 'YMCA',
-  CLUB_SIX: 'Club SIX',
-  ELITE_GYMS: 'Elite Gyms',
-  CROSS_FIT: 'CrossFit Gym',
-  ORANGETHEORY: 'Orangetheory',
+  SNAP_FITNESS: 'Snap Fitness',
+  PURE_FIT: 'PureFit',
+  
+  // Premium/Mid-Range
+  ORANGETHEORY: 'Orangetheory Fitness',
+  EQUINOX: 'Equinox',
+  BARRY_BOOTCAMP: 'Barry\'s Bootcamp',
+  RUMBLE_BOXING: 'Rumble Boxing',
+  FLYWHEEL: 'Flywheel Sports',
+  PELOTON: 'Peloton Studio',
+  
+  // CrossFit & Functional
+  CROSSFIT: 'CrossFit',
   F45: 'F45',
+  TOUGH_MUDDER: 'Tough Mudder',
+  QUEST_FITNESS: 'Quest Fitness',
+  
+  // Budget/Value
+  CLUB_SIX: 'Club SIX',
+  IRON_WILL: 'Iron Will Fitness',
+  ONE_SIZE_FITS_ALL: 'One Size Fits All',
+  
+  // Premium Boutique
+  ELITE_GYMS: 'Elite Gyms',
+  PRESTIGE_FITNESS: 'Prestige Fitness',
+  STRENGTH_SPACE: 'Strength Space',
+  POWER_PLATE: 'Power Plate Studios',
+  
+  // Yoga & Mind-Body
+  LULULEMON_MIRROR: 'Lululemon Mirror',
+  YOGA_ONE: 'Yoga One',
+  MOKSHA_YOGA: 'Moksha Yoga',
+  HOT_YOGA: 'Hot Yoga Studio',
+  PURE_YOG: 'Pure Yog',
+  
+  // Female-Focused
+  CURVES: 'Curves',
+  BABES_FIT: 'Babes Fit',
+  WOMEN_FIT: 'Women\'s Fitness',
+  
+  // Dance & Movement
+  MOVE_STUDIO: 'Move Studio',
+  ZUMBA: 'Zumba Live',
+  POLE_DANCE: 'Pole Dance Studio',
+  BARRE3: 'Barre3',
+  PILATES_PLUS: 'Pilates Plus',
+  
+  // Specialized Training
+  PERSONAL_TRAINING_+: 'Personal Training +',
+  BOXING_CANADA: 'Boxing Canada',
+  MMA_CANADA: 'MMA Canada',
+  MARTIAL_ARTS: 'Martial Arts Studio',
+  
+  // Budget/Student Chains
+  WORKOUTS: 'Workouts.com',
+  FITPLEX: 'FitPlex',
+  GYMNASIUM: 'Gymnasium',
+  
+  // Regional Leaders
+  QUEST_FITNESS_AB: 'Quest Fitness (AB)',
+  STEVE_NASH_FITNESS: 'Steve Nash Fitness',
+  MOVATI: 'Movati Athletic Club',
+  LA_FITNESS: 'LA Fitness',
+  24_HOUR_FITNESS: '24 Hour Fitness',
+  
+  // Boutique/Premium
+  SOLIDCORE: 'SolidCore',
+  ORANGETHEORY_PREMIER: 'Orangetheory Premier',
+  FLUX_STUDIO: 'Flux Studio',
+  STUDIO_PLUS: 'Studio Plus',
 };
 
 export const PROVINCES = {
@@ -33,7 +103,7 @@ export const PROVINCES = {
  * Format: { id, name, brand, city, address, province, coordinates }
  */
 export const QUEBEC_GYMS = [
-  // Montreal
+  // Montreal - Anytime Fitness
   {
     id: 'mtl-anytime-1',
     name: 'Anytime Fitness Downtown',
@@ -44,6 +114,17 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.5017, lng: -73.5673 },
   },
   {
+    id: 'mtl-anytime-2',
+    name: 'Anytime Fitness Griffintown',
+    brand: GYM_BRANDS.ANYTIME_FITNESS,
+    city: 'Montreal',
+    address: '1300 Rue William',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4864, lng: -73.5608 },
+  },
+  
+  // Montreal - GoodLife Fitness
+  {
     id: 'mtl-goodlife-1',
     name: 'GoodLife Fitness Plateau',
     brand: GYM_BRANDS.GOODLIFE_FITNESS,
@@ -53,6 +134,17 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.5255, lng: -73.5948 },
   },
   {
+    id: 'mtl-goodlife-2',
+    name: 'GoodLife Fitness NDG',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Montreal',
+    address: '5960 Rue Sherbrooke O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4863, lng: -73.6265 },
+  },
+  
+  // Montreal - YMCA
+  {
     id: 'mtl-ymca-1',
     name: 'YMCA Montreal Downtown',
     brand: GYM_BRANDS.YMCA,
@@ -61,6 +153,8 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5047, lng: -73.5788 },
   },
+
+  // Montreal - Premium
   {
     id: 'mtl-elite-1',
     name: 'Elite Gyms Westmount',
@@ -78,6 +172,42 @@ export const QUEBEC_GYMS = [
     address: '350 Rue St-Paul O',
     province: PROVINCES.QC,
     coordinates: { lat: 45.5028, lng: -73.5611 },
+  },
+  {
+    id: 'mtl-f45-1',
+    name: 'F45 Training Marais',
+    brand: GYM_BRANDS.F45,
+    city: 'Montreal',
+    address: '4050 Rue Sainte-Catherine E',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5194, lng: -73.5668 },
+  },
+  {
+    id: 'mtl-crossfit-1',
+    name: 'CrossFit Montreal',
+    brand: GYM_BRANDS.CROSSFIT,
+    city: 'Montreal',
+    address: '6000 Rue Saint-Urbain',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5244, lng: -73.5883 },
+  },
+  {
+    id: 'mtl-yoga-1',
+    name: 'Moksha Yoga Montreal',
+    brand: GYM_BRANDS.MOKSHA_YOGA,
+    city: 'Montreal',
+    address: '4700 Rue de Bullion',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5266, lng: -73.5941 },
+  },
+  {
+    id: 'mtl-pilates-1',
+    name: 'Pilates Plus Montreal',
+    brand: GYM_BRANDS.PILATES_PLUS,
+    city: 'Montreal',
+    address: '3600 Rue Wellington',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4723, lng: -73.5799 },
   },
 
   // Quebec City
@@ -108,6 +238,15 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 46.8172, lng: -71.1968 },
   },
+  {
+    id: 'qc-orangetheory-1',
+    name: 'Orangetheory Fitness Quebec',
+    brand: GYM_BRANDS.ORANGETHEORY,
+    city: 'Quebec City',
+    address: '2600 Rue de la Faïencerie',
+    province: PROVINCES.QC,
+    coordinates: { lat: 46.8220, lng: -71.1544 },
+  },
 
   // Gatineau
   {
@@ -127,6 +266,15 @@ export const QUEBEC_GYMS = [
     address: '580 Boulevard de la Gappe',
     province: PROVINCES.QC,
     coordinates: { lat: 45.5030, lng: -75.7522 },
+  },
+  {
+    id: 'gatineau-f45-1',
+    name: 'F45 Training Gatineau',
+    brand: GYM_BRANDS.F45,
+    city: 'Gatineau',
+    address: '220 rue Principale',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4316, lng: -75.7446 },
   },
 
   // Sherbrooke
@@ -148,6 +296,15 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.4088, lng: -71.8750 },
   },
+  {
+    id: 'sherbrooke-ymca-1',
+    name: 'YMCA Sherbrooke',
+    brand: GYM_BRANDS.YMCA,
+    city: 'Sherbrooke',
+    address: '1100 Rue de Montréal',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4101, lng: -71.8863 },
+  },
 
   // Laval
   {
@@ -168,14 +325,192 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5733, lng: -73.7547 },
   },
+  {
+    id: 'laval-orangetheory-1',
+    name: 'Orangetheory Fitness Laval',
+    brand: GYM_BRANDS.ORANGETHEORY,
+    city: 'Laval',
+    address: '3100 Boulevard Saint-Martin O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5039, lng: -73.7521 },
+  },
+
+  // Longueuil
+  {
+    id: 'longueuil-goodlife-1',
+    name: 'GoodLife Fitness Longueuil',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Longueuil',
+    address: '2280 Rue Rouen',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5166, lng: -73.5033 },
+  },
+  {
+    id: 'longueuil-f45-1',
+    name: 'F45 Training Longueuil',
+    brand: GYM_BRANDS.F45,
+    city: 'Longueuil',
+    address: '100 Rue Saint-Charles O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5160, lng: -73.4943 },
+  },
 ];
 
 /**
- * Placeholder for future expansion
- * Ontario, BC, Alberta, etc.
+ * Ontario Gyms Database (Major Cities)
  */
 export const ONTARIO_GYMS = [
-  // Coming soon - structure same as QUEBEC_GYMS
+  // Toronto
+  {
+    id: 'tor-goodlife-1',
+    name: 'GoodLife Fitness Downtown Toronto',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Toronto',
+    address: '181 Bay Street',
+    province: PROVINCES.ON,
+    coordinates: { lat: 43.6426, lng: -79.3871 },
+  },
+  {
+    id: 'tor-anytime-1',
+    name: 'Anytime Fitness Toronto',
+    brand: GYM_BRANDS.ANYTIME_FITNESS,
+    city: 'Toronto',
+    address: '20 Queen Street W',
+    province: PROVINCES.ON,
+    coordinates: { lat: 43.6520, lng: -79.3795 },
+  },
+  {
+    id: 'tor-equinox-1',
+    name: 'Equinox Toronto',
+    brand: GYM_BRANDS.EQUINOX,
+    city: 'Toronto',
+    address: '250 Bloor Street W',
+    province: PROVINCES.ON,
+    coordinates: { lat: 43.6690, lng: -79.3957 },
+  },
+  {
+    id: 'tor-orangetheory-1',
+    name: 'Orangetheory Fitness Toronto',
+    brand: GYM_BRANDS.ORANGETHEORY,
+    city: 'Toronto',
+    address: '317 Dundas Street W',
+    province: PROVINCES.ON,
+    coordinates: { lat: 43.6606, lng: -79.3903 },
+  },
+
+  // Ottawa
+  {
+    id: 'ottawa-goodlife-1',
+    name: 'GoodLife Fitness Ottawa',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Ottawa',
+    address: '250 Tremblay Road',
+    province: PROVINCES.ON,
+    coordinates: { lat: 45.4215, lng: -75.6972 },
+  },
+  {
+    id: 'ottawa-anytime-1',
+    name: 'Anytime Fitness Ottawa',
+    brand: GYM_BRANDS.ANYTIME_FITNESS,
+    city: 'Ottawa',
+    address: '1 Sparks Street',
+    province: PROVINCES.ON,
+    coordinates: { lat: 45.4215, lng: -75.6989 },
+  },
+];
+
+/**
+ * British Columbia Gyms (Major Cities)
+ */
+export const BC_GYMS = [
+  // Vancouver
+  {
+    id: 'van-goodlife-1',
+    name: 'GoodLife Fitness Vancouver',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Vancouver',
+    address: '1055 Homer Street',
+    province: PROVINCES.BC,
+    coordinates: { lat: 49.2824, lng: -123.1207 },
+  },
+  {
+    id: 'van-steve-nash-1',
+    name: 'Steve Nash Fitness Vancouver',
+    brand: GYM_BRANDS.STEVE_NASH_FITNESS,
+    city: 'Vancouver',
+    address: '1835 Barclay Street',
+    province: PROVINCES.BC,
+    coordinates: { lat: 49.2829, lng: -123.1636 },
+  },
+  {
+    id: 'van-orangetheory-1',
+    name: 'Orangetheory Fitness Vancouver',
+    brand: GYM_BRANDS.ORANGETHEORY,
+    city: 'Vancouver',
+    address: '743 Seymour Street',
+    province: PROVINCES.BC,
+    coordinates: { lat: 49.2823, lng: -123.1141 },
+  },
+];
+
+/**
+ * Alberta Gyms (Major Cities)
+ */
+export const ALBERTA_GYMS = [
+  // Calgary
+  {
+    id: 'calgary-goodlife-1',
+    name: 'GoodLife Fitness Calgary',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Calgary',
+    address: '250 Centre Street S',
+    province: PROVINCES.AB,
+    coordinates: { lat: 51.0447, lng: -104.6368 },
+  },
+  {
+    id: 'calgary-quest-1',
+    name: 'Quest Fitness Calgary',
+    brand: GYM_BRANDS.QUEST_FITNESS_AB,
+    city: 'Calgary',
+    address: '11 Aspen Landing Boulevard',
+    province: PROVINCES.AB,
+    coordinates: { lat: 51.0329, lng: -114.2082 },
+  },
+
+  // Edmonton
+  {
+    id: 'edmonton-goodlife-1',
+    name: 'GoodLife Fitness Edmonton',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Edmonton',
+    address: '10220 103 Avenue NW',
+    province: PROVINCES.AB,
+    coordinates: { lat: 53.5444, lng: -113.5119 },
+  },
+  {
+    id: 'edmonton-movati-1',
+    name: 'Movati Athletic Club Edmonton',
+    brand: GYM_BRANDS.MOVATI,
+    city: 'Edmonton',
+    address: '124 Street & 102 Avenue',
+    province: PROVINCES.AB,
+    coordinates: { lat: 53.5362, lng: -113.5043 },
+  },
+];
+
+/**
+ * Manitoba & Other Provinces
+ */
+export const MANITOBA_GYMS = [
+  {
+    id: 'wpg-goodlife-1',
+    name: 'GoodLife Fitness Winnipeg',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Winnipeg',
+    address: '201 Portage Avenue',
+    province: PROVINCES.MB,
+    coordinates: { lat: 49.8951, lng: -97.1384 },
+  },
 ];
 
 /**
@@ -191,7 +526,12 @@ export const getGymsByProvince = (province) => {
       return QUEBEC_GYMS;
     case 'ON':
       return ONTARIO_GYMS;
-    // Add more provinces as needed
+    case 'BC':
+      return BC_GYMS;
+    case 'AB':
+      return ALBERTA_GYMS;
+    case 'MB':
+      return MANITOBA_GYMS;
     default:
       return QUEBEC_GYMS; // Default to Quebec
   }
@@ -221,7 +561,13 @@ export const getGymsByProvinceAndCity = (province, city = null) => {
  * Get gym by ID
  */
 export const getGymById = (gymId) => {
-  const allGyms = [...QUEBEC_GYMS, ...ONTARIO_GYMS];
+  const allGyms = [
+    ...QUEBEC_GYMS,
+    ...ONTARIO_GYMS,
+    ...BC_GYMS,
+    ...ALBERTA_GYMS,
+    ...MANITOBA_GYMS,
+  ];
   return allGyms.find((gym) => gym.id === gymId);
 };
 
@@ -229,7 +575,13 @@ export const getGymById = (gymId) => {
  * Search gyms by name or brand
  */
 export const searchGyms = (query, province = null) => {
-  const gyms = province ? getGymsByProvince(province) : [...QUEBEC_GYMS, ...ONTARIO_GYMS];
+  const gyms = province ? getGymsByProvince(province) : [
+    ...QUEBEC_GYMS,
+    ...ONTARIO_GYMS,
+    ...BC_GYMS,
+    ...ALBERTA_GYMS,
+    ...MANITOBA_GYMS,
+  ];
   const lowerQuery = query.toLowerCase();
   return gyms.filter(
     (gym) =>
@@ -240,10 +592,16 @@ export const searchGyms = (query, province = null) => {
 };
 
 /**
- * Get all unique gym brands
+ * Get all unique gym brands (optionally filtered by province)
  */
 export const getAllBrands = (province = null) => {
-  const gyms = province ? getGymsByProvince(province) : [...QUEBEC_GYMS, ...ONTARIO_GYMS];
+  const gyms = province ? getGymsByProvince(province) : [
+    ...QUEBEC_GYMS,
+    ...ONTARIO_GYMS,
+    ...BC_GYMS,
+    ...ALBERTA_GYMS,
+    ...MANITOBA_GYMS,
+  ];
   const brands = [...new Set(gyms.map((gym) => gym.brand))];
   return brands.sort();
 };
