@@ -67,6 +67,13 @@ header p {
   color: #475569;
 }
 
+.location-selectors {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
 .location-picker {
   display: grid;
   gap: 0.35rem;
@@ -75,12 +82,12 @@ header p {
 }
 
 .location-picker select {
-  min-width: 170px;
+  min-width: 130px;
   border: 1px solid #cbd5e1;
   border-radius: 10px;
   background: #fff;
   padding: 0.55rem 0.65rem;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: border-color 0.2s, box-shadow 0.2s;
 }

@@ -23,6 +23,13 @@ import {
   getConfidenceLabel,
   isDataStale,
 } from './utils';
+import {
+  PROVINCES,
+  QUEBEC_GYMS,
+  getCitiesByProvince,
+  getGymsByProvinceAndCity,
+  getGymById,
+} from './gymsDatabase';
 
 // Error Boundary: Catches component errors and displays a friendly message
 class ErrorBoundary extends React.Component {
@@ -94,18 +101,29 @@ const getHeatmapColor = (value) => {
   return HEATMAP_STEPS[4];
 };
 
-const fetchDashboardData = async (location) => {
+const fetchDashboardData = async (gymId) => {
   await new Promise((resolve) => setTimeout(resolve, 450));
   
   if (Math.random() < 0.04) {
     throw new Error('Unable to reach sensor network.');
   }
 
+  const gym = getGymById(gymId);
+  const gymName = gym ? gym.name : 'Unknown Gym';
+  
+  // Generate location-aware occupancy data
   const live = generateLiveOccupancy();
-  if (location === 'Downtown') {
-    live.percentage = Math.min(100, live.percentage + 12);
-    live.level = live.percentage < 35 ? 'Low' : live.percentage < 75 ? 'Moderate' : 'High';
+  
+  // Adjust occupancy based on gym brand/location (peaks at different times)
+  if (gym?.brand.includes('Anytime')) {
+    live.percentage = Math.min(100, live.percentage + 5); // Slightly busier
   }
+  if (gymName.includes('Downtown')) {
+    live.percentage = Math.min(100, live.percentage + 10); // Downtown is busier
+  }
+  
+  live.gymName = gymName;
+  live.gymId = gymId;
 
   return {
     live,
@@ -132,7 +150,10 @@ const StatusCard = ({ live }) => {
   return (
     <section className="card">
       <div className="card-header">
-        <h2>Current occupancy</h2>
+        <div>
+          <h2>Current occupancy</h2>
+          <p className="subtle" style={{ margin: '0.3rem 0 0 0' }}>{live.gymName}</p>
+        </div>
         <FreshnessBadge lastUpdatedAt={live.lastUpdatedAt} />
       </div>
 
@@ -234,7 +255,31 @@ function App() {
   const [weeklyHeatmap, setWeeklyHeatmap] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [location, setLocation] = useState('Main Street');
+  
+  // Location selection state
+  const [province, setProvince] = useState('Quebec');
+  const [city, setCity] = useState('Montreal');
+  const [gymId, setGymId] = useState('mtl-anytime-1'); // Initial gym
+
+  // Derived state
+  const cities = useMemo(() => getCitiesByProvince(province), [province]);
+  const gyms = useMemo(() => getGymsByProvinceAndCity(province, city), [province, city]);
+  
+  // Reset city when province changes
+  useEffect(() => {
+    const newCities = getCitiesByProvince(province);
+    if (newCities.length > 0 && !newCities.includes(city)) {
+      setCity(newCities[0]);
+    }
+  }, [province, city]);
+
+  // Reset gym when province or city changes
+  useEffect(() => {
+    const newGyms = getGymsByProvinceAndCity(province, city);
+    if (newGyms.length > 0 && !newGyms.find((g) => g.id === gymId)) {
+      setGymId(newGyms[0].id);
+    }
+  }, [province, city, gymId]);
 
   const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
 
@@ -244,7 +289,7 @@ function App() {
     const load = async () => {
       try {
         setError('');
-        const data = await fetchDashboardData(location);
+        const data = await fetchDashboardData(gymId);
         if (!mounted) return;
         setLive(data.live);
         setTrend(data.trend);
@@ -267,7 +312,7 @@ function App() {
       mounted = false;
       clearInterval(refresh);
     };
-  }, [location]);
+  }, [gymId]);
 
   return (
     <div className="app-shell">
@@ -279,18 +324,50 @@ function App() {
             <h1>GymPulse</h1>
             <p>Know when to go in under 5 seconds.</p>
           </div>
-          <label className="location-picker">
-            Location
-            <select 
-              value={location} 
-              onChange={(event) => setLocation(event.target.value)}
-              aria-label="Select gym location"
-            >
-              <option>Main Street</option>
-              <option>Downtown</option>
-              <option>West End</option>
-            </select>
-          </label>
+          
+          {/* Location Selectors */}
+          <div className="location-selectors">
+            <label className="location-picker">
+              Province
+              <select 
+                value={province}
+                onChange={(e) => setProvince(e.target.value)}
+                aria-label="Select province"
+              >
+                {Object.entries(PROVINCES).map(([key, label]) => (
+                  <option key={key} value={label}>{label}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="location-picker">
+              City
+              <select 
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                aria-label="Select city"
+              >
+                {cities.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+
+            <label className="location-picker">
+              Gym
+              <select 
+                value={gymId}
+                onChange={(e) => setGymId(e.target.value)}
+                aria-label="Select gym"
+              >
+                {gyms.map((gym) => (
+                  <option key={gym.id} value={gym.id}>
+                    {gym.brand} - {gym.name.split(' ').slice(-1)[0]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </header>
 
         <div id="main-content">
