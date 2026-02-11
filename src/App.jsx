@@ -23,6 +23,8 @@ import {
   getConfidenceLabel,
   isDataStale,
   aggregateCheckIns,
+  calculateDistance,
+  getUserLocation,
 } from './utils';
 import {
   PROVINCES,
@@ -168,7 +170,7 @@ const FreshnessBadge = ({ lastUpdatedAt, checkInCount }) => {
   );
 };
 
-const StatusCard = ({ live, onCheckIn, checkInSuccess }) => {
+const StatusCard = ({ live, onCheckIn, checkInSuccess, checkInLoading }) => {
   const levelColor = OCCUPANCY_COLORS[live.level] || '#334155';
 
   return (
@@ -205,22 +207,24 @@ const StatusCard = ({ live, onCheckIn, checkInSuccess }) => {
         <button 
           className="check-in-button"
           onClick={onCheckIn}
+          disabled={checkInLoading}
           aria-label="Check in at this gym"
           style={{
             padding: '0.75rem 2rem',
             fontSize: '1rem',
             fontWeight: '600',
             color: 'white',
-            backgroundColor: '#2563eb',
+            backgroundColor: checkInLoading ? '#9ca3af' : '#2563eb',
             border: 'none',
             borderRadius: '0.5rem',
-            cursor: 'pointer',
+            cursor: checkInLoading ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.2s',
+            opacity: checkInLoading ? 0.6 : 1,
           }}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#2563eb'}
+          onMouseOver={(e) => !checkInLoading && (e.target.style.backgroundColor = '#1d4ed8')}
+          onMouseOut={(e) => !checkInLoading && (e.target.style.backgroundColor = '#2563eb')}
         >
-          I'm Here
+          {checkInLoading ? 'Verifying location...' : 'I\'m Here'}
         </button>
         
         {checkInSuccess && (
@@ -348,13 +352,14 @@ function App() {
     return id;
   });
   const [checkInSuccess, setCheckInSuccess] = useState('');
+  const [checkInLoading, setCheckInLoading] = useState(false);
 
   // Derived state
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
   const gyms = useMemo(() => getGymsByProvinceAndCity(province, city), [province, city]);
   
-  // Check-in handler
-  const handleCheckIn = () => {
+  // Check-in handler with GPS proximity validation
+  const handleCheckIn = async () => {
     const now = Date.now();
     const hourAgo = now - 60 * 60 * 1000;
     
@@ -370,14 +375,60 @@ function App() {
       return;
     }
     
-    const newCheckIn = { gymId, timestamp: now, userId };
-    const updated = [...checkIns, newCheckIn];
-    setCheckIns(updated);
-    localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
+    setCheckInLoading(true);
     
-    const gym = getGymById(gymId);
-    setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'}`);
-    setTimeout(() => setCheckInSuccess(''), 3000);
+    try {
+      // Get user's current location
+      const userLocation = await getUserLocation();
+      const gym = getGymById(gymId);
+      
+      if (!gym || !gym.coordinates) {
+        setCheckInSuccess('⚠️ Gym location unavailable');
+        setTimeout(() => setCheckInSuccess(''), 3000);
+        setCheckInLoading(false);
+        return;
+      }
+      
+      // Calculate distance from gym
+      const distance = calculateDistance(
+        userLocation.lat,
+        userLocation.lng,
+        gym.coordinates.lat,
+        gym.coordinates.lng
+      );
+      
+      // Validate proximity (200 meters = ~2 blocks)
+      const MAX_DISTANCE = 200;
+      if (distance > MAX_DISTANCE) {
+        const distanceKm = (distance / 1000).toFixed(1);
+        setCheckInSuccess(`⚠️ Too far from gym (${distanceKm} km away)`);
+        setTimeout(() => setCheckInSuccess(''), 4000);
+        setCheckInLoading(false);
+        return;
+      }
+      
+      // Valid check-in - save it
+      const newCheckIn = { gymId, timestamp: now, userId, distance: Math.round(distance) };
+      const updated = [...checkIns, newCheckIn];
+      setCheckIns(updated);
+      localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
+      
+      setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'}`);
+      setTimeout(() => setCheckInSuccess(''), 3000);
+    } catch (error) {
+      if (error.code === 1) {
+        setCheckInSuccess('⚠️ Enable location access to check in');
+      } else if (error.code === 2) {
+        setCheckInSuccess('⚠️ Location unavailable');
+      } else if (error.code === 3) {
+        setCheckInSuccess('⚠️ Location timeout');
+      } else {
+        setCheckInSuccess('⚠️ Unable to verify location');
+      }
+      setTimeout(() => setCheckInSuccess(''), 4000);
+    } finally {
+      setCheckInLoading(false);
+    }
   };
   
   // Reset city when province changes
@@ -504,6 +555,7 @@ function App() {
                 live={live} 
                 onCheckIn={handleCheckIn}
                 checkInSuccess={checkInSuccess}
+                checkInLoading={checkInLoading}
               />
               <div className="grid">
                 <TrendChartCard trend={trend} />
