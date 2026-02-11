@@ -25,6 +25,7 @@ import {
   aggregateCheckIns,
   calculateDistance,
   getUserLocation,
+  analyzeCheckIns,
 } from './utils';
 import {
   PROVINCES,
@@ -317,6 +318,131 @@ const WeeklyHeatmapCard = ({ weeklyHeatmap }) => {
   );
 };
 
+// Analytics Dashboard Components
+const AnalyticsDashboard = ({ analytics, checkIns }) => {
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  // Prepare hourly chart data
+  const hourlyData = analytics.hourlyDistribution.map((count, hour) => ({
+    hour: hour === 0 ? '12am' : hour < 12 ? `${hour}am` : hour === 12 ? '12pm' : `${hour - 12}pm`,
+    checkIns: count,
+  }));
+
+  return (
+    <div>
+      {/* Stats Overview */}
+      <div className="grid" style={{ marginBottom: '1.5rem' }}>
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>Total Check-ins</p>
+          <p className="big-number" style={{ color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+            {analytics.totalCheckIns}
+          </p>
+        </section>
+        
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>Unique Gyms</p>
+          <p className="big-number" style={{ color: '#059669', margin: '0.5rem 0 0 0' }}>
+            {analytics.uniqueGyms}
+          </p>
+        </section>
+        
+        <section className="card" style={{ textAlign: 'center' }}>
+          <p className="subtle" style={{ margin: 0 }}>This Week</p>
+          <p className="big-number" style={{ color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+            {analytics.thisWeekCheckIns}
+          </p>
+        </section>
+      </div>
+
+      {/* Most Visited Gym */}
+      {analytics.mostVisited && (
+        <section className="card" style={{ marginBottom: '1.5rem' }}>
+          <h2>Most Visited Gym</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0.5rem 0' }}>
+                {analytics.mostVisited.gym.brand}
+              </p>
+              <p className="subtle" style={{ margin: 0 }}>
+                {analytics.mostVisited.gym.name}
+              </p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#2563eb', margin: 0 }}>
+                {analytics.mostVisited.count}
+              </p>
+              <p className="subtle" style={{ margin: 0 }}>visits</p>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Hourly Distribution Chart */}
+      <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <h2>Check-in Times</h2>
+        <ResponsiveContainer width="100%" height={250}>
+          <LineChart data={hourlyData}>
+            <CartesianGrid strokeDasharray="4 4" />
+            <XAxis dataKey="hour" />
+            <YAxis allowDecimals={false} />
+            <Tooltip />
+            <Line 
+              type="monotone" 
+              dataKey="checkIns" 
+              stroke="#2563eb" 
+              strokeWidth={2}
+              name="Check-ins"
+            />
+          </LineChart>
+        </ResponsiveContainer>
+        <p className="subtle" style={{ textAlign: 'center', margin: '0.5rem 0 0 0' }}>
+          {analytics.averageDistance > 0 && `Average distance: ${analytics.averageDistance}m from gym`}
+        </p>
+      </section>
+
+      {/* Recent Check-ins */}
+      <section className="card">
+        <h2>Recent Check-ins</h2>
+        {analytics.recentCheckIns.length === 0 ? (
+          <p className="subtle">No check-ins yet. Visit a gym and tap "I'm Here" to start tracking!</p>
+        ) : (
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            {analytics.recentCheckIns.map((checkIn, idx) => (
+              <div 
+                key={idx}
+                style={{
+                  padding: '1rem',
+                  borderBottom: idx < analytics.recentCheckIns.length - 1 ? '1px solid #e5e7eb' : 'none',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: '600', margin: '0 0 0.25rem 0' }}>
+                      {checkIn.gym?.brand || 'Unknown Gym'}
+                    </p>
+                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                      {checkIn.gym?.city || 'Unknown City'}
+                      {checkIn.distance !== undefined && ` • ${checkIn.distance}m away`}
+                    </p>
+                  </div>
+                  <div style={{ textAlign: 'right', minWidth: '120px' }}>
+                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                      {checkIn.date.toLocaleDateString()}
+                    </p>
+                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                      {checkIn.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
 function App() {
   const [live, setLive] = useState(null);
   const [trend, setTrend] = useState([]);
@@ -353,6 +479,7 @@ function App() {
   });
   const [checkInSuccess, setCheckInSuccess] = useState('');
   const [checkInLoading, setCheckInLoading] = useState(false);
+  const [activeView, setActiveView] = useState('dashboard'); // 'dashboard' or 'analytics'
 
   // Derived state
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
@@ -448,6 +575,7 @@ function App() {
   }, [province, city, gymId]);
 
   const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
+  const analytics = useMemo(() => analyzeCheckIns(checkIns, getGymById), [checkIns]);
 
   useEffect(() => {
     let mounted = true;
@@ -489,10 +617,47 @@ function App() {
           <div>
             <h1>GymPulse</h1>
             <p>Know when to go in under 5 seconds.</p>
+            
+            {/* Tab Navigation */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+              <button
+                onClick={() => setActiveView('dashboard')}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  backgroundColor: activeView === 'dashboard' ? '#2563eb' : '#f3f4f6',
+                  color: activeView === 'dashboard' ? 'white' : '#6b7280',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={() => setActiveView('analytics')}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  backgroundColor: activeView === 'analytics' ? '#2563eb' : '#f3f4f6',
+                  color: activeView === 'analytics' ? 'white' : '#6b7280',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Analytics
+              </button>
+            </div>
           </div>
           
-          {/* Location Selectors */}
-          <div className="location-selectors">
+          {/* Location Selectors - only show on dashboard view */}
+          {activeView === 'dashboard' && (
+            <div className="location-selectors">
             <label className="location-picker">
               Province
               <select 
@@ -534,35 +699,42 @@ function App() {
               </select>
             </label>
           </div>
+          )}
         </header>
 
         <div id="main-content">
-          {loading && (
-            <div className="card" role="status" aria-live="polite" aria-label="Loading occupancy data">
-              <div className="loading">Loading live occupancy…</div>
-            </div>
-          )}
-
-          {!loading && error && (
-            <div className="card error" role="alert" aria-label="Error loading data">
-              {error} Please retry in a moment.
-            </div>
-          )}
-
-          {!loading && !error && live && (
+          {activeView === 'analytics' ? (
+            <AnalyticsDashboard analytics={analytics} checkIns={checkIns} />
+          ) : (
             <>
-              <StatusCard 
-                live={live} 
-                onCheckIn={handleCheckIn}
-                checkInSuccess={checkInSuccess}
-                checkInLoading={checkInLoading}
-              />
-              <div className="grid">
-                <TrendChartCard trend={trend} />
-                <PredictionChartCard predictions={predictions} />
-              </div>
-              <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
-              <div className="recommendation" role="status" aria-live="polite">{bestVisitText}</div>
+              {loading && (
+                <div className="card" role="status" aria-live="polite" aria-label="Loading occupancy data">
+                  <div className="loading">Loading live occupancy…</div>
+                </div>
+              )}
+
+              {!loading && error && (
+                <div className="card error" role="alert" aria-label="Error loading data">
+                  {error} Please retry in a moment.
+                </div>
+              )}
+
+              {!loading && !error && live && (
+                <>
+                  <StatusCard 
+                    live={live} 
+                    onCheckIn={handleCheckIn}
+                    checkInSuccess={checkInSuccess}
+                    checkInLoading={checkInLoading}
+                  />
+                  <div className="grid">
+                    <TrendChartCard trend={trend} />
+                    <PredictionChartCard predictions={predictions} />
+                  </div>
+                  <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
+                  <div className="recommendation" role="status" aria-live="polite">{bestVisitText}</div>
+                </>
+              )}
             </>
           )}
         </div>

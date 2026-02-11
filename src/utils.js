@@ -182,3 +182,89 @@ export const getUserLocation = () => {
     );
   });
 };
+
+/**
+ * Analyze check-in data to generate user analytics
+ * @param {Array} checkIns - Array of check-in objects
+ * @param {Function} getGymById - Function to get gym details by ID
+ * @returns {Object} - Analytics data with stats and visualizations
+ */
+export const analyzeCheckIns = (checkIns, getGymById) => {
+  if (!checkIns || checkIns.length === 0) {
+    return {
+      totalCheckIns: 0,
+      uniqueGyms: 0,
+      mostVisited: null,
+      recentCheckIns: [],
+      hourlyDistribution: Array(24).fill(0),
+      weeklyDistribution: Array(7).fill(0),
+      averageDistance: 0,
+    };
+  }
+
+  // Total check-ins
+  const totalCheckIns = checkIns.length;
+
+  // Unique gyms visited
+  const uniqueGymIds = [...new Set(checkIns.map(c => c.gymId))];
+  const uniqueGyms = uniqueGymIds.length;
+
+  // Most visited gym
+  const gymCounts = {};
+  checkIns.forEach(c => {
+    gymCounts[c.gymId] = (gymCounts[c.gymId] || 0) + 1;
+  });
+  const mostVisitedId = Object.keys(gymCounts).reduce((a, b) => 
+    gymCounts[a] > gymCounts[b] ? a : b
+  );
+  const mostVisitedGym = getGymById(mostVisitedId);
+  const mostVisited = mostVisitedGym ? {
+    gym: mostVisitedGym,
+    count: gymCounts[mostVisitedId],
+  } : null;
+
+  // Recent check-ins (last 10)
+  const recentCheckIns = [...checkIns]
+    .sort((a, b) => b.timestamp - a.timestamp)
+    .slice(0, 10)
+    .map(c => ({
+      ...c,
+      gym: getGymById(c.gymId),
+      date: new Date(c.timestamp),
+    }));
+
+  // Hourly distribution (0-23)
+  const hourlyDistribution = Array(24).fill(0);
+  checkIns.forEach(c => {
+    const hour = new Date(c.timestamp).getHours();
+    hourlyDistribution[hour]++;
+  });
+
+  // Weekly distribution (0=Sun, 1=Mon, ..., 6=Sat)
+  const weeklyDistribution = Array(7).fill(0);
+  checkIns.forEach(c => {
+    const day = new Date(c.timestamp).getDay();
+    weeklyDistribution[day]++;
+  });
+
+  // Average distance from gym
+  const checkInsWithDistance = checkIns.filter(c => c.distance !== undefined);
+  const averageDistance = checkInsWithDistance.length > 0
+    ? Math.round(checkInsWithDistance.reduce((sum, c) => sum + c.distance, 0) / checkInsWithDistance.length)
+    : 0;
+
+  // This week's check-ins
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const thisWeekCheckIns = checkIns.filter(c => c.timestamp > oneWeekAgo).length;
+
+  return {
+    totalCheckIns,
+    uniqueGyms,
+    mostVisited,
+    recentCheckIns,
+    hourlyDistribution,
+    weeklyDistribution,
+    averageDistance,
+    thisWeekCheckIns,
+  };
+};
