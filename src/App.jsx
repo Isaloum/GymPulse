@@ -27,6 +27,8 @@ import {
   getUserLocation,
   analyzeCheckIns,
   analyzeCommunityCheckIns,
+  calculateAdvancedAnalytics,
+  generatePartnershipDataExport,
 } from './utils';
 import {
   PROVINCES,
@@ -685,6 +687,269 @@ const CommunityStatsView = ({ communityStats }) => {
   );
 };
 
+// Premium Paywall Component
+const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync }) => {
+  return (
+    <div>
+      {!isPremium ? (
+        <section className="card" style={{ 
+          backgroundColor: '#fef3c7', 
+          border: '2px solid #fbbf24',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ fontSize: '2.5rem' }}>✨</div>
+            <div style={{ flex: 1 }}>
+              <h2 style={{ margin: '0 0 0.5rem 0' }}>Unlock GymPulse Premium</h2>
+              <p className="subtle" style={{ margin: 0 }}>
+                Advanced analytics, health integration, partnership data exports
+              </p>
+            </div>
+            <button
+              onClick={onUpgrade}
+              style={{
+                padding: '0.75rem 2rem',
+                backgroundColor: '#f59e0b',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.5rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Upgrade Now
+            </button>
+          </div>
+        </section>
+      ) : (
+        <section className="card" style={{ 
+          backgroundColor: '#d1fae5', 
+          border: '2px solid #10b981',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <p style={{ margin: 0, fontWeight: '600', color: '#047857' }}>
+                ✓ Premium Active
+              </p>
+              <p className="subtle" style={{ margin: '0.25rem 0 0 0', color: '#065f46' }}>
+                All premium features unlocked
+              </p>
+            </div>
+            <button
+              onClick={onAppleHealthSync}
+              style={{
+                padding: '0.5rem 1rem',
+                fontSize: '0.9rem',
+                backgroundColor: '#10b981',
+                color: 'white',
+                border: 'none',
+                borderRadius: '0.375rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+              }}
+            >
+              Connect Apple Health
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
+  );
+};
+
+// Advanced Analytics View (Premium)
+const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  
+  if (!isPremium) {
+    return (
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <p style={{ fontSize: '1.2rem', color: '#6b7280', marginBottom: '1rem' }}>
+          Advanced Analytics requires Premium
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {/* Consistency Score */}
+      <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <h2>Fitness Consistency Score</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '3rem', fontWeight: '700', margin: 0, color: '#2563eb' }}>
+              {advancedAnalytics.consistencyScore}%
+            </p>
+            <p className="subtle" style={{ margin: '0.5rem 0 0 0' }}>
+              Based on {advancedAnalytics.consistencyScore < 50 ? 'Developing' : advancedAnalytics.consistencyScore < 80 ? 'Good' : 'Excellent'} frequency
+            </p>
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: '600', marginTop: 0, marginBottom: '0.5rem' }}>
+              🎯 Stretch Goal: {advancedAnalytics.stretchGoal}%
+            </p>
+            <p className="subtle" style={{ margin: 0, fontSize: '0.9rem' }}>
+              Increase consistency by 25% for elite status
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Weekly Forecast */}
+      <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <h2>Next 7 Days Forecast</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+          {advancedAnalytics.forecastedCheckIns.map((forecast, idx) => (
+            <div 
+              key={idx}
+              style={{
+                padding: '1rem',
+                backgroundColor: idx === advancedAnalytics.bestDayOfWeek ? '#dbeafe' : '#f3f4f6',
+                borderRadius: '0.5rem',
+                textAlign: 'center',
+                border: idx === advancedAnalytics.bestDayOfWeek ? '2px solid #2563eb' : 'none',
+              }}
+            >
+              <p style={{ margin: 0, fontWeight: '600', fontSize: '0.9rem' }}>
+                {DAYS[idx]}
+              </p>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>
+                {forecast}
+              </p>
+              <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                {idx === advancedAnalytics.bestDayOfWeek ? '⭐ Best' : 'workouts'}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Best Day Achievement */}
+      <section className="card">
+        <h2>Your Best Workout Day</h2>
+        <div style={{ padding: '1.5rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem', textAlign: 'center' }}>
+          <p style={{ fontSize: '2rem', margin: 0 }}>
+            {DAYS[advancedAnalytics.bestDayOfWeek]}
+          </p>
+          <p className="subtle" style={{ margin: '0.5rem 0 0 0' }}>
+            You're most consistent on {DAYS[advancedAnalytics.bestDayOfWeek].toLowerCase()}s
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+// Partnership Data Export View (Premium)
+const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
+  if (!isPremium) {
+    return (
+      <div style={{ textAlign: 'center', padding: '2rem' }}>
+        <p style={{ fontSize: '1.2rem', color: '#6b7280', marginBottom: '1rem' }}>
+          Partnership Data requires Premium
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <section className="card" style={{ marginBottom: '1.5rem', backgroundColor: '#eff6ff' }}>
+        <h2>Gym Partnership Data</h2>
+        <p className="subtle" style={{ marginTop: 0 }}>
+          Aggregated, anonymized insights for gym partners
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
+            <p className="subtle" style={{ margin: 0 }}>Active Users</p>
+            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+              {partnershipData.summary.totalActiveUsers}
+            </p>
+          </div>
+          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
+            <p className="subtle" style={{ margin: 0 }}>Total Check-ins</p>
+            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#059669', margin: '0.5rem 0 0 0' }}>
+              {partnershipData.summary.totalCheckIns}
+            </p>
+          </div>
+          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
+            <p className="subtle" style={{ margin: 0 }}>Partnered Gyms</p>
+            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+              {partnershipData.gynInsights.length}
+            </p>
+          </div>
+        </div>
+
+        <div style={{ marginTop: '1.5rem' }}>
+          <button
+            onClick={onExport}
+            style={{
+              padding: '0.75rem 2rem',
+              backgroundColor: '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '0.5rem',
+              fontWeight: '600',
+              cursor: 'pointer',
+              fontSize: '1rem',
+            }}
+          >
+            📥 Download Partnership Data (JSON)
+          </button>
+          <p className="subtle" style={{ margin: '1rem 0 0 0', fontSize: '0.85rem' }}>
+            Format: Anonymized hourly/weekly patterns per gym
+          </p>
+        </div>
+      </section>
+
+      {/* Top Partnered Gyms */}
+      <section className="card">
+        <h2>Top Gyms by Activity</h2>
+        {partnershipData.gynInsights.length === 0 ? (
+          <p className="subtle">No gym data available yet</p>
+        ) : (
+          <div>
+            {partnershipData.gynInsights
+              .sort((a, b) => b.metrics.totalCheckIns - a.metrics.totalCheckIns)
+              .slice(0, 5)
+              .map((gym, idx) => (
+                <div 
+                  key={idx}
+                  style={{
+                    padding: '1rem',
+                    borderBottom: idx < 4 ? '1px solid #e5e7eb' : 'none',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <p style={{ fontWeight: '600', margin: 0 }}>
+                        #{idx + 1} {gym.gym.brand}
+                      </p>
+                      <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem' }}>
+                        {gym.gym.city} • {gym.metrics.uniqueUsers} members active
+                      </p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontWeight: '600', margin: 0, color: '#2563eb', fontSize: '1.2rem' }}>
+                        {gym.metrics.estimatedOccupancy}%
+                      </p>
+                      <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                        avg occupancy
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
 function App() {
   const [live, setLive] = useState(null);
   const [trend, setTrend] = useState([]);
@@ -819,8 +1084,47 @@ function App() {
   const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
   const analytics = useMemo(() => analyzeCheckIns(checkIns, getGymById), [checkIns]);
   const communityStats = useMemo(() => analyzeCommunityCheckIns(checkIns, getGymById), [checkIns]);
+  const advancedAnalytics = useMemo(() => calculateAdvancedAnalytics(analytics, checkIns), [analytics, checkIns]);
+  const partnershipData = useMemo(() => generatePartnershipDataExport(communityStats, checkIns, getGymById), [communityStats, checkIns]);
 
-  // Update alert preferences
+  // Premium membership handler
+  const handlePremiumUpgrade = () => {
+    // In production: integrate Stripe, RevenueCat, or other payment platform
+    // For MVP: mock upgrade
+    setIsPremium(true);
+    localStorage.setItem('gymPulsePremium', JSON.stringify(true));
+  };
+
+  // Export partnership data
+  const exportPartnershipData = () => {
+    const dataStr = JSON.stringify(partnershipData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const exportFileDefaultName = `gym-pulse-partnership-${new Date().toISOString().split('T')[0]}.json`;
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  // Apple Health integration
+  const requestAppleHealthAccess = async () => {
+    if (!navigator.permissions) {
+      setHasAppleHealthAccess(false);
+      return;
+    }
+
+    try {
+      // Note: Actual Apple HealthKit integration requires native iOS wrapper
+      // This is a placeholder for future "Apple Health by GymPulse" app
+      const result = await navigator.permissions.query({ name: 'health' });
+      if (result.state === 'granted') {
+        setHasAppleHealthAccess(true);
+        localStorage.setItem('gymPulseAppleHealth', 'true');
+      }
+    } catch (error) {
+      console.log('Apple Health permission request:', error.message);
+    }
+  };
   const handleUpdateAlertPreferences = (newPrefs) => {
     const updated = { ...newPrefs, gymId };
     setAlertPreferences(updated);
@@ -936,6 +1240,22 @@ function App() {
               >
                 Community
               </button>
+              <button
+                onClick={() => setActiveView('premium')}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  fontSize: '0.95rem',
+                  fontWeight: '600',
+                  border: 'none',
+                  borderRadius: '0.375rem',
+                  cursor: 'pointer',
+                  backgroundColor: activeView === 'premium' ? '#f59e0b' : '#f3f4f6',
+                  color: activeView === 'premium' ? 'white' : '#6b7280',
+                  transition: 'all 0.2s',
+                }}
+              >
+                Premium {isPremium ? '✓' : ''}
+              </button>
             </div>
           </div>
           
@@ -987,7 +1307,32 @@ function App() {
         </header>
 
         <div id="main-content">
-          {activeView === 'community' ? (
+          {activeView === 'premium' ? (
+            <div>
+              <PremiumPaywall 
+                isPremium={isPremium}
+                onUpgrade={handlePremiumUpgrade}
+                onAppleHealthSync={requestAppleHealthAccess}
+              />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <h2 style={{ marginTop: 0 }}>Advanced Analytics</h2>
+                  <AdvancedAnalyticsView 
+                    advancedAnalytics={advancedAnalytics} 
+                    isPremium={isPremium}
+                  />
+                </div>
+                <div>
+                  <h2 style={{ marginTop: 0 }}>Partnership Data</h2>
+                  <PartnershipExportView
+                    partnershipData={partnershipData}
+                    isPremium={isPremium}
+                    onExport={exportPartnershipData}
+                  />
+                </div>
+              </div>
+            </div>
+          ) : activeView === 'community' ? (
             <CommunityStatsView communityStats={communityStats} />
           ) : activeView === 'analytics' ? (
             <AnalyticsDashboard analytics={analytics} checkIns={checkIns} />

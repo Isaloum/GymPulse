@@ -383,3 +383,122 @@ export const analyzeCommunityCheckIns = (checkIns, getGymById) => {
     mostPopularGym,
   };
 };
+
+/**
+ * Calculate advanced analytics: weekly trends, predictions, forecasting
+ * @param {Object} analytics - User analytics from analyzeCheckIns
+ * @param {Array} checkIns - User's check-in history
+ * @returns {Object} - Advanced analytics data
+ */
+export const calculateAdvancedAnalytics = (analytics, checkIns) => {
+  if (!checkIns || checkIns.length === 0) {
+    return {
+      weeklyTrends: Array(7).fill(0),
+      forecastedCheckIns: Array(7).fill(0),
+      consistencyScore: 0,
+      bestDayOfWeek: null,
+      stretchGoal: 0,
+    };
+  }
+
+  // Weekly trends (check-ins per day over last 28 days)
+  const lastMonthCheckIns = checkIns.filter(
+    c => c.timestamp > Date.now() - 28 * 24 * 60 * 60 * 1000
+  );
+  
+  const weeklyTrends = Array(7).fill(0);
+  lastMonthCheckIns.forEach(c => {
+    const day = new Date(c.timestamp).getDay();
+    weeklyTrends[day]++;
+  });
+
+  // Calculate consistency score (0-100)
+  // Based on check-ins in last 4 weeks
+  const fourWeeksCheckIns = checkIns.filter(
+    c => c.timestamp > Date.now() - 4 * 7 * 24 * 60 * 60 * 1000
+  ).length;
+  const consistencyScore = Math.min(100, Math.round((fourWeeksCheckIns / 16) * 100)); // Target: 4x per week
+
+  // Best day of week (most check-ins)
+  const maxCheckIns = Math.max(...weeklyTrends);
+  const bestDayOfWeek = weeklyTrends.indexOf(maxCheckIns);
+
+  // Forecast next 7 days (simple linear trend)
+  const avgWeeklyCheckIns = fourWeeksCheckIns / 4;
+  const avgDailyCheckIns = avgWeeklyCheckIns / 7;
+  const forecastedCheckIns = Array(7).fill(Math.ceil(avgDailyCheckIns));
+
+  // Stretch goal (increase consistency by 25%)
+  const stretchGoal = Math.round(consistencyScore * 1.25);
+
+  return {
+    weeklyTrends,
+    forecastedCheckIns,
+    consistencyScore,
+    bestDayOfWeek,
+    stretchGoal,
+  };
+};
+
+/**
+ * Generate partnership data export (anonymized aggregates)
+ * @param {Object} communityStats - Community statistics
+ * @param {Array} checkIns - All check-ins
+ * @param {Function} getGymById - Gym lookup function
+ * @returns {Object} - Partnership-ready data for gyms
+ */
+export const generatePartnershipDataExport = (communityStats, checkIns, getGymById) => {
+  const exportData = {
+    exportDate: new Date().toISOString(),
+    summary: {
+      totalActiveUsers: new Set(checkIns.map(c => c.userId)).size,
+      totalCheckIns: checkIns.length,
+      dateRange: {
+        start: checkIns.length > 0 ? new Date(Math.min(...checkIns.map(c => c.timestamp))).toISOString() : null,
+        end: new Date().toISOString(),
+      },
+    },
+    gynInsights: [], // Will be populated per gym
+  };
+
+  // Per-gym insights
+  communityStats.gymsWithActivity.forEach(item => {
+    const gymCheckIns = checkIns.filter(c => c.gymId === item.gymId);
+    
+    // Hourly distribution
+    const hourlyDistribution = Array(24).fill(0);
+    gymCheckIns.forEach(c => {
+      const hour = new Date(c.timestamp).getHours();
+      hourlyDistribution[hour]++;
+    });
+
+    // Weekly distribution
+    const weeklyDistribution = Array(7).fill(0);
+    gymCheckIns.forEach(c => {
+      const day = new Date(c.timestamp).getDay();
+      weeklyDistribution[day]++;
+    });
+
+    exportData.gynInsights.push({
+      gym: {
+        id: item.gym.id,
+        name: item.gym.name,
+        brand: item.gym.brand,
+        city: item.gym.city,
+      },
+      metrics: {
+        uniqueUsers: new Set(gymCheckIns.map(c => c.userId)).size,
+        totalCheckIns: item.last24HoursCheckIns,
+        averageOccupancy: item.estimatedOccupancy,
+        estimatedCapacity: item.capacity,
+        peakHour: hourlyDistribution.indexOf(Math.max(...hourlyDistribution)),
+        peakDay: weeklyDistribution.indexOf(Math.max(...weeklyDistribution)),
+      },
+      hourlyDistribution,
+      weeklyDistribution,
+    });
+  });
+
+  return exportData;
+};
+
