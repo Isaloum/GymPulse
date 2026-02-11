@@ -2,9 +2,6 @@
  * Gym Locations Database
  * Real gym brands and locations across Canada
  * Comprehensive database of major fitness chains
- * 
- * Quebec brands list last updated: 2026-02-11
- * Source: Authoritative multi-location brands operating in QC
  */
 
 /**
@@ -111,136 +108,11 @@ export const PROVINCES = {
 };
 
 /**
- * Quebec Gyms Database - Comprehensive multi-location brands
- * Based on authoritative sources consulted Feb 2026
+ * Quebec Gyms Database
  * Format: { id, name, brand, city, address, province, coordinates }
  */
 export const QUEBEC_GYMS = [
-  // ===== MONTREAL - Major Quebec Chains =====
-  // Éconofitness (Broad QC footprint)
-  {
-    id: 'mtl-econofitness-1',
-    name: 'Éconofitness Downtown',
-    brand: GYM_BRANDS.ECONOFITNESS,
-    city: 'Montreal',
-    address: '1111 Rue Ste-Catherine Ouest',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5017, lng: -73.5673 },
-  },
-  {
-    id: 'mtl-econofitness-2',
-    name: 'Éconofitness Plateau',
-    brand: GYM_BRANDS.ECONOFITNESS,
-    city: 'Montreal',
-    address: '4500 Avenue du Parc',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5244, lng: -73.5883 },
-  },
-  {
-    id: 'mtl-econofitness-3',
-    name: 'Éconofitness Griffintown',
-    brand: GYM_BRANDS.ECONOFITNESS,
-    city: 'Montreal',
-    address: '1300 Rue William',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4864, lng: -73.5608 },
-  },
-  
-  // Nautilus Plus (Quebec-wide network)
-  {
-    id: 'mtl-nautilus-1',
-    name: 'Nautilus Plus Downtown',
-    brand: GYM_BRANDS.NAUTILUS_PLUS,
-    city: 'Montreal',
-    address: '1425 Rue Drummond',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5041, lng: -73.5711 },
-  },
-  {
-    id: 'mtl-nautilus-2',
-    name: 'Nautilus Plus Villeray',
-    brand: GYM_BRANDS.NAUTILUS_PLUS,
-    city: 'Montreal',
-    address: '755 Boulevard Saint-Laurent',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5215, lng: -73.5783 },
-  },
-  
-  // Énergie Cardio (Fitness club chain)
-  {
-    id: 'mtl-energie-1',
-    name: 'Énergie Cardio Downtown',
-    brand: GYM_BRANDS.ENERGIE_CARDIO,
-    city: 'Montreal',
-    address: '2000 Rue McGill College',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5014, lng: -73.5636 },
-  },
-  {
-    id: 'mtl-energie-2',
-    name: 'Énergie Cardio Plateau',
-    brand: GYM_BRANDS.ENERGIE_CARDIO,
-    city: 'Montreal',
-    address: '4400 Rue Saint-Denis',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5215, lng: -73.5783 },
-  },
-  
-  // World Gym Québec (Franchise/licensed brand model)
-  {
-    id: 'mtl-world-gym-1',
-    name: 'World Gym Québec Downtown',
-    brand: GYM_BRANDS.WORLD_GYM_QUEBEC,
-    city: 'Montreal',
-    address: '1500 Rue Crescent',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5044, lng: -73.5748 },
-  },
-
-  // ===== MONTREAL - Major National Chains =====
-  // GoodLife Fitness
-  {
-    id: 'mtl-goodlife-1',
-    name: 'GoodLife Fitness Plateau',
-    brand: GYM_BRANDS.GOODLIFE_FITNESS,
-    city: 'Montreal',
-    address: '4300 Rue de Bullion',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5255, lng: -73.5948 },
-  },
-  {
-    id: 'mtl-goodlife-2',
-    name: 'GoodLife Fitness NDG',
-    brand: GYM_BRANDS.GOODLIFE_FITNESS,
-    city: 'Montreal',
-    address: '5960 Rue Sherbrooke O',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4863, lng: -73.6265 },
-  },
-  
-  // Fit4Less (GoodLife group budget chain)
-  {
-    id: 'mtl-fit4less-1',
-    name: 'Fit4Less Montreal',
-    brand: GYM_BRANDS.FIT4LESS,
-    city: 'Montreal',
-    address: '3550 Boulevard Saint-Laurent',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5247, lng: -73.5876 },
-  },
-  
-  // Planet Fitness
-  {
-    id: 'mtl-planet-1',
-    name: 'Planet Fitness Downtown',
-    brand: GYM_BRANDS.PLANET_FITNESS,
-    city: 'Montreal',
-    address: '1500 Rue Crescent',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5044, lng: -73.5748 },
-  },
-  
-  // Anytime Fitness (24/7 chain)
+  // Montreal - Anytime Fitness
   {
     id: 'mtl-anytime-1',
     name: 'Anytime Fitness Downtown',
@@ -260,7 +132,27 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.4864, lng: -73.5608 },
   },
   
-  // YMCA (Community fitness centers)
+  // Montreal - GoodLife Fitness
+  {
+    id: 'mtl-goodlife-1',
+    name: 'GoodLife Fitness Plateau',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Montreal',
+    address: '4300 Rue de Bullion',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5255, lng: -73.5948 },
+  },
+  {
+    id: 'mtl-goodlife-2',
+    name: 'GoodLife Fitness NDG',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
+    city: 'Montreal',
+    address: '5960 Rue Sherbrooke O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4863, lng: -73.6265 },
+  },
+  
+  // Montreal - YMCA
   {
     id: 'mtl-ymca-1',
     name: 'YMCA Montreal Downtown',
@@ -270,20 +162,17 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5047, lng: -73.5788 },
   },
-  
-  // Crunch Fitness
-  {
-    id: 'mtl-crunch-1',
-    name: 'Crunch Fitness Downtown',
-    brand: GYM_BRANDS.CRUNCH_FITNESS,
-    city: 'Montreal',
-    address: '3030 Rue Sherbrooke Ouest',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4918, lng: -73.6084 },
-  },
 
-  // ===== MONTREAL - Boutique/Fitness Studios =====
-  // Orangetheory Fitness
+  // Montreal - Premium
+  {
+    id: 'mtl-elite-1',
+    name: 'Elite Gyms Westmount',
+    brand: GYM_BRANDS.ELITE_GYMS,
+    city: 'Montreal',
+    address: '4900 Rue Sherbrooke O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.4898, lng: -73.6059 },
+  },
   {
     id: 'mtl-orangetheory-1',
     name: 'Orangetheory Fitness Old Montreal',
@@ -294,17 +183,6 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.5028, lng: -73.5611 },
   },
   {
-    id: 'mtl-orangetheory-2',
-    name: 'Orangetheory Fitness Plateau',
-    brand: GYM_BRANDS.ORANGETHEORY,
-    city: 'Montreal',
-    address: '1800 Boulevard Saint-Laurent',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5215, lng: -73.5783 },
-  },
-  
-  // F45 Training
-  {
     id: 'mtl-f45-1',
     name: 'F45 Training Marais',
     brand: GYM_BRANDS.F45,
@@ -313,19 +191,6 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5194, lng: -73.5668 },
   },
-  
-  // Rumble Boxing
-  {
-    id: 'mtl-rumble-1',
-    name: 'Rumble Boxing Montreal',
-    brand: GYM_BRANDS.RUMBLE_BOXING,
-    city: 'Montreal',
-    address: '1250 Rue Bishop',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5054, lng: -73.5705 },
-  },
-  
-  // CrossFit (Affiliate network)
   {
     id: 'mtl-crossfit-1',
     name: 'CrossFit Montreal',
@@ -335,11 +200,8 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5244, lng: -73.5883 },
   },
-
-  // ===== MONTREAL - Yoga & Wellness =====
-  // Moksha Yoga
   {
-    id: 'mtl-moksha-1',
+    id: 'mtl-yoga-1',
     name: 'Moksha Yoga Montreal',
     brand: GYM_BRANDS.MOKSHA_YOGA,
     city: 'Montreal',
@@ -347,8 +209,6 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5266, lng: -73.5941 },
   },
-  
-  // Pilates Plus
   {
     id: 'mtl-pilates-1',
     name: 'Pilates Plus Montreal',
@@ -358,70 +218,8 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.4723, lng: -73.5799 },
   },
-  
-  // Barre3
-  {
-    id: 'mtl-barre-1',
-    name: 'Barre3 Montreal',
-    brand: GYM_BRANDS.BARRE3,
-    city: 'Montreal',
-    address: '1900 Avenue McGill College',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5029, lng: -73.5635 },
-  },
-  
-  // Curves (Women's chain)
-  {
-    id: 'mtl-curves-1',
-    name: 'Curves Montreal',
-    brand: GYM_BRANDS.CURVES,
-    city: 'Montreal',
-    address: '2200 Rue Bleury',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5075, lng: -73.5667 },
-  },
-  
-  // Premium
-  {
-    id: 'mtl-elite-1',
-    name: 'Elite Gyms Westmount',
-    brand: GYM_BRANDS.ELITE_GYMS,
-    city: 'Montreal',
-    address: '4900 Rue Sherbrooke O',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4898, lng: -73.6059 },
-  },
 
-  // ===== QUEBEC CITY - Major Quebec Brands =====
-  {
-    id: 'qc-econofitness-1',
-    name: 'Éconofitness Quebec City',
-    brand: GYM_BRANDS.ECONOFITNESS,
-    city: 'Quebec City',
-    address: '1200 Rue Saint-Jean',
-    province: PROVINCES.QC,
-    coordinates: { lat: 46.8139, lng: -71.2080 },
-  },
-  {
-    id: 'qc-nautilus-1',
-    name: 'Nautilus Plus Quebec City',
-    brand: GYM_BRANDS.NAUTILUS_PLUS,
-    city: 'Quebec City',
-    address: '1000 Rue d\'Aiguillon',
-    province: PROVINCES.QC,
-    coordinates: { lat: 46.8156, lng: -71.2022 },
-  },
-  {
-    id: 'qc-energie-1',
-    name: 'Énergie Cardio Sainte-Foy',
-    brand: GYM_BRANDS.ENERGIE_CARDIO,
-    city: 'Quebec City',
-    address: '2700 Boulevard Laurier',
-    province: PROVINCES.QC,
-    coordinates: { lat: 46.7909, lng: -71.2265 },
-  },
-
-  // National chains in Quebec City
+  // Quebec City
   {
     id: 'qc-anytime-1',
     name: 'Anytime Fitness Vieux-Quebec',
@@ -459,42 +257,24 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 46.8220, lng: -71.1544 },
   },
 
-  // ===== GATINEAU (National Capital Region) - Western QC presence =====
-  {
-    id: 'gatineau-goodlife-1',
-    name: 'GoodLife Fitness Hull',
-    brand: GYM_BRANDS.GOODLIFE_FITNESS,
-    city: 'Gatineau',
-    address: '158 Rue de la Cathédrale',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4395, lng: -75.7391 },
-  },
+  // Gatineau
   {
     id: 'gatineau-anytime-1',
     name: 'Anytime Fitness Gatineau',
     brand: GYM_BRANDS.ANYTIME_FITNESS,
     city: 'Gatineau',
-    address: '415 Boulevard de la Cité',
+    address: '275 Boulevard de la Gappe',
     province: PROVINCES.QC,
-    coordinates: { lat: 45.4423, lng: -75.7369 },
+    coordinates: { lat: 45.5017, lng: -75.7447 },
   },
   {
-    id: 'gatineau-fit4less-1',
-    name: 'Fit4Less Gatineau',
-    brand: GYM_BRANDS.FIT4LESS,
+    id: 'gatineau-goodlife-1',
+    name: 'GoodLife Fitness Buckingham',
+    brand: GYM_BRANDS.GOODLIFE_FITNESS,
     city: 'Gatineau',
-    address: '250 Boulevard Saint-Joseph',
+    address: '580 Boulevard de la Gappe',
     province: PROVINCES.QC,
-    coordinates: { lat: 45.4497, lng: -75.7470 },
-  },
-  {
-    id: 'gatineau-ymca-1',
-    name: 'YMCA Hull',
-    brand: GYM_BRANDS.YMCA,
-    city: 'Gatineau',
-    address: '167 Rue de la Cathédrale',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4395, lng: -75.7385 },
+    coordinates: { lat: 45.5030, lng: -75.7522 },
   },
   {
     id: 'gatineau-f45-1',
@@ -506,13 +286,13 @@ export const QUEBEC_GYMS = [
     coordinates: { lat: 45.4316, lng: -75.7446 },
   },
 
-  // ===== SHERBROOKE =====
+  // Sherbrooke
   {
-    id: 'sherbrooke-econofitness-1',
-    name: 'Éconofitness Sherbrooke',
-    brand: GYM_BRANDS.ECONOFITNESS,
+    id: 'sherbrooke-anytime-1',
+    name: 'Anytime Fitness Downtown',
+    brand: GYM_BRANDS.ANYTIME_FITNESS,
     city: 'Sherbrooke',
-    address: '1800 Rue King Ouest',
+    address: '105 Rue King O',
     province: PROVINCES.QC,
     coordinates: { lat: 45.4015, lng: -71.8947 },
   },
@@ -534,53 +314,8 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.4101, lng: -71.8863 },
   },
-  {
-    id: 'sherbrooke-anytime-1',
-    name: 'Anytime Fitness Sherbrooke',
-    brand: GYM_BRANDS.ANYTIME_FITNESS,
-    city: 'Sherbrooke',
-    address: '3150 Rue King Ouest',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.3977, lng: -71.9443 },
-  },
-  {
-    id: 'sherbrooke-energie-1',
-    name: 'Énergie Cardio Sherbrooke',
-    brand: GYM_BRANDS.ENERGIE_CARDIO,
-    city: 'Sherbrooke',
-    address: '50 Rue Wellington Nord',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4041, lng: -71.9051 },
-  },
 
-  // ===== LAVAL =====
-  {
-    id: 'laval-nautilus-1',
-    name: 'Nautilus Plus Chomedey',
-    brand: GYM_BRANDS.NAUTILUS_PLUS,
-    city: 'Laval',
-    address: '3595 Boulevard Chomedey',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5731, lng: -73.7391 },
-  },
-  {
-    id: 'laval-energie-1',
-    name: 'Énergie Cardio Vimont',
-    brand: GYM_BRANDS.ENERGIE_CARDIO,
-    city: 'Laval',
-    address: '2800 Boulevard Vimont',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.6045, lng: -73.7208 },
-  },
-  {
-    id: 'laval-econofitness-1',
-    name: 'Éconofitness Laval',
-    brand: GYM_BRANDS.ECONOFITNESS,
-    city: 'Laval',
-    address: '3700 Boulevard Chomedey',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5745, lng: -73.7406 },
-  },
+  // Laval
   {
     id: 'laval-goodlife-1',
     name: 'GoodLife Fitness Laval',
@@ -599,63 +334,34 @@ export const QUEBEC_GYMS = [
     province: PROVINCES.QC,
     coordinates: { lat: 45.5733, lng: -73.7547 },
   },
+  {
+    id: 'laval-orangetheory-1',
+    name: 'Orangetheory Fitness Laval',
+    brand: GYM_BRANDS.ORANGETHEORY,
+    city: 'Laval',
+    address: '3100 Boulevard Saint-Martin O',
+    province: PROVINCES.QC,
+    coordinates: { lat: 45.5039, lng: -73.7521 },
+  },
 
-  // ===== LONGUEUIL =====
+  // Longueuil
   {
     id: 'longueuil-goodlife-1',
     name: 'GoodLife Fitness Longueuil',
     brand: GYM_BRANDS.GOODLIFE_FITNESS,
     city: 'Longueuil',
-    address: '195 Rue Saint-Laurent',
+    address: '2280 Rue Rouen',
     province: PROVINCES.QC,
     coordinates: { lat: 45.5166, lng: -73.5033 },
-  },
-  {
-    id: 'longueuil-crunch-1',
-    name: 'Crunch Fitness Longueuil',
-    brand: GYM_BRANDS.CRUNCH_FITNESS,
-    city: 'Longueuil',
-    address: '1900 Boulevard Taschereau',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5120, lng: -73.5144 },
-  },
-  {
-    id: 'longueuil-anytime-1',
-    name: 'Anytime Fitness Longueuil',
-    brand: GYM_BRANDS.ANYTIME_FITNESS,
-    city: 'Longueuil',
-    address: '1600 Boulevard Taschereau',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.5145, lng: -73.5118 },
   },
   {
     id: 'longueuil-f45-1',
     name: 'F45 Training Longueuil',
     brand: GYM_BRANDS.F45,
     city: 'Longueuil',
-    address: '2000 Boulevard Taschereau',
+    address: '100 Rue Saint-Charles O',
     province: PROVINCES.QC,
-    coordinates: { lat: 45.5090, lng: -73.5170 },
-  },
-
-  // ===== ADDITIONAL MAJOR CITIES =====
-  {
-    id: 'brossard-planet-1',
-    name: 'Planet Fitness Brossard',
-    brand: GYM_BRANDS.PLANET_FITNESS,
-    city: 'Brossard',
-    address: '8000 Boulevard Leduc',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4586, lng: -73.4863 },
-  },
-  {
-    id: 'brossard-orangetheory-1',
-    name: 'Orangetheory Fitness Brossard',
-    brand: GYM_BRANDS.ORANGETHEORY,
-    city: 'Brossard',
-    address: '7900 Boulevard Taschereau',
-    province: PROVINCES.QC,
-    coordinates: { lat: 45.4598, lng: -73.4797 },
+    coordinates: { lat: 45.5160, lng: -73.4943 },
   },
 ];
 
