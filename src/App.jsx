@@ -216,23 +216,10 @@ const StatusCard = ({ live, onCheckIn, checkInSuccess, checkInLoading }) => {
           className="check-in-button"
           onClick={onCheckIn}
           disabled={checkInLoading}
-          aria-label="Check in at this gym"
-          style={{
-            padding: '0.75rem 2rem',
-            fontSize: '1rem',
-            fontWeight: '600',
-            color: 'white',
-            backgroundColor: checkInLoading ? '#9ca3af' : '#2563eb',
-            border: 'none',
-            borderRadius: '0.5rem',
-            cursor: checkInLoading ? 'not-allowed' : 'pointer',
-            transition: 'background-color 0.2s',
-            opacity: checkInLoading ? 0.6 : 1,
-          }}
-          onMouseOver={(e) => !checkInLoading && (e.target.style.backgroundColor = '#1d4ed8')}
-          onMouseOut={(e) => !checkInLoading && (e.target.style.backgroundColor = '#2563eb')}
+          aria-label="Check in at this gym - your primary action"
+          data-loading={checkInLoading ? 'true' : 'false'}
         >
-          {checkInLoading ? 'Verifying location...' : 'I\'m Here'}
+          {checkInLoading ? '⏳ Verifying location...' : '✓ I\'m Here'}
         </button>
         
         {checkInSuccess && (
@@ -269,49 +256,40 @@ const AlertSettings = ({ alertPreferences, onUpdate }) => {
   };
 
   return (
-    <section className="card" style={{ marginBottom: '1.5rem', backgroundColor: '#eff6ff' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <section className="card card--soft section-stack">
+      <div className="row-between">
         <div>
-          <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1rem' }}>🔔 Peak Hour Alerts</h3>
-          <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+          <h3>🔔 Peak Hour Alerts</h3>
+          <p className="subtle text-xs" style={{ margin: 0 }}>
             Get notified when gym is {alertPreferences.enabled ? `below ${alertPreferences.threshold}%` : 'quiet'}
           </p>
         </div>
         <button
           onClick={() => setShowSettings(!showSettings)}
-          style={{
-            padding: '0.5rem 1rem',
-            fontSize: '0.85rem',
-            border: 'none',
-            borderRadius: '0.375rem',
-            cursor: 'pointer',
-            backgroundColor: 'white',
-            color: '#2563eb',
-            fontWeight: '600',
-          }}
+          className="ghost-button"
         >
           {showSettings ? 'Hide' : 'Settings'}
         </button>
       </div>
 
       {showSettings && (
-        <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #dbeafe' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem', cursor: 'pointer' }}>
+        <div className="section-divider">
+          <label className="toggle-row">
             <input
               type="checkbox"
               checked={alertPreferences.enabled}
               onChange={handleToggle}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              className="toggle-input"
             />
-            <span style={{ fontSize: '0.9rem' }}>Enable alerts for this gym</span>
+            <span className="text-sm">Enable alerts for this gym</span>
           </label>
 
           {alertPreferences.enabled && (
             <div>
-              <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '0.5rem' }}>
+              <label className="text-sm" style={{ display: 'block', marginBottom: '0.5rem' }}>
                 Alert when occupancy is below:
               </label>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div className="row-center">
                 <input
                   type="range"
                   min="10"
@@ -423,24 +401,24 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
   return (
     <div>
       {/* Stats Overview */}
-      <div className="grid" style={{ marginBottom: '1.5rem' }}>
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>Total Check-ins</p>
-          <p className="big-number" style={{ color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+      <div className="stat-grid">
+        <section className="card stat-card">
+          <p className="stat-label">Total Check-ins</p>
+          <p className="stat-number" data-variant="blue">
             {analytics.totalCheckIns}
           </p>
         </section>
         
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>Unique Gyms</p>
-          <p className="big-number" style={{ color: '#059669', margin: '0.5rem 0 0 0' }}>
+        <section className="card stat-card">
+          <p className="stat-label">Unique Gyms</p>
+          <p className="stat-number" data-variant="green">
             {analytics.uniqueGyms}
           </p>
         </section>
         
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>This Week</p>
-          <p className="big-number" style={{ color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+        <section className="card stat-card">
+          <p className="stat-label">This Week</p>
+          <p className="stat-number" data-variant="purple">
             {analytics.thisWeekCheckIns}
           </p>
         </section>
@@ -448,9 +426,9 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
 
       {/* Most Visited Gym */}
       {analytics.mostVisited && (
-        <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <section className="card section-stack">
           <h2>Most Visited Gym</h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="row-between">
             <div>
               <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0.5rem 0' }}>
                 {analytics.mostVisited.gym.brand}
@@ -459,8 +437,8 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
                 {analytics.mostVisited.gym.name}
               </p>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#2563eb', margin: 0 }}>
+            <div className="centered" style={{ textAlign: 'right' }}>
+              <p className="stat-number" data-variant="blue" style={{ fontSize: '2rem', margin: 0 }}>
                 {analytics.mostVisited.count}
               </p>
               <p className="subtle" style={{ margin: 0 }}>visits</p>
@@ -470,7 +448,7 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
       )}
 
       {/* Hourly Distribution Chart */}
-      <section className="card" style={{ marginBottom: '1.5rem' }}>
+      <section className="card section-stack">
         <h2>Check-in Times</h2>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={hourlyData}>
@@ -487,7 +465,7 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
             />
           </LineChart>
         </ResponsiveContainer>
-        <p className="subtle" style={{ textAlign: 'center', margin: '0.5rem 0 0 0' }}>
+        <p className="subtle centered" style={{ margin: '0.5rem 0 0 0' }}>
           {analytics.averageDistance > 0 && `Average distance: ${analytics.averageDistance}m from gym`}
         </p>
       </section>
@@ -498,30 +476,27 @@ const AnalyticsDashboard = ({ analytics, checkIns }) => {
         {analytics.recentCheckIns.length === 0 ? (
           <p className="subtle">No check-ins yet. Visit a gym and tap "I'm Here" to start tracking!</p>
         ) : (
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div className="scroll-area">
             {analytics.recentCheckIns.map((checkIn, idx) => (
               <div 
                 key={idx}
-                style={{
-                  padding: '1rem',
-                  borderBottom: idx < analytics.recentCheckIns.length - 1 ? '1px solid #e5e7eb' : 'none',
-                }}
+                className="list-item"
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="list-row" style={{ alignItems: 'flex-start' }}>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontWeight: '600', margin: '0 0 0.25rem 0' }}>
                       {checkIn.gym?.brand || 'Unknown Gym'}
                     </p>
-                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                    <p className="subtle text-xs" style={{ margin: 0 }}>
                       {checkIn.gym?.city || 'Unknown City'}
                       {checkIn.distance !== undefined && ` • ${checkIn.distance}m away`}
                     </p>
                   </div>
                   <div style={{ textAlign: 'right', minWidth: '120px' }}>
-                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                    <p className="subtle text-xs" style={{ margin: 0 }}>
                       {checkIn.date.toLocaleDateString()}
                     </p>
-                    <p className="subtle" style={{ margin: 0, fontSize: '0.85rem' }}>
+                    <p className="subtle text-xs" style={{ margin: 0 }}>
                       {checkIn.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -543,48 +518,48 @@ const CommunityStatsView = ({ communityStats }) => {
   return (
     <div>
       {/* Community Overview Stats */}
-      <div className="grid" style={{ marginBottom: '1.5rem' }}>
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>Community Check-ins</p>
-          <p className="big-number" style={{ color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+      <div className="stat-grid">
+        <section className="card stat-card">
+          <p className="stat-label">Community Check-ins</p>
+          <p className="stat-number" data-variant="blue">
             {communityStats.totalCommunityCheckIns}
           </p>
-          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>all users</p>
+          <p className="subtle text-xs" style={{ margin: '0.5rem 0 0 0' }}>all users</p>
         </section>
         
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>Gyms with Activity</p>
-          <p className="big-number" style={{ color: '#059669', margin: '0.5rem 0 0 0' }}>
+        <section className="card stat-card">
+          <p className="stat-label">Gyms with Activity</p>
+          <p className="stat-number" data-variant="green">
             {communityStats.gymsWithActivity.length}
           </p>
-          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>active locations</p>
+          <p className="subtle text-xs" style={{ margin: '0.5rem 0 0 0' }}>active locations</p>
         </section>
         
-        <section className="card" style={{ textAlign: 'center' }}>
-          <p className="subtle" style={{ margin: 0 }}>Peak Hours</p>
-          <p className="big-number" style={{ color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+        <section className="card stat-card">
+          <p className="stat-label">Peak Hours</p>
+          <p className="stat-number" data-variant="purple">
             {communityStats.peakHours.length > 0 
               ? HOURS[Math.floor(communityStats.peakHours[0].hour)]
               : 'N/A'
             }
           </p>
-          <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>busiest time</p>
+          <p className="subtle text-xs" style={{ margin: '0.5rem 0 0 0' }}>busiest time</p>
         </section>
       </div>
 
       {/* Most Popular Gym */}
       {communityStats.mostPopularGym && (
-        <section className="card" style={{ marginBottom: '1.5rem' }}>
+        <section className="card section-stack">
           <h2>🔥 Busiest Right Now</h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+          <div className="row-between align-start">
             <div style={{ flex: 1 }}>
               <p style={{ fontSize: '1.1rem', fontWeight: '600', margin: '0.5rem 0' }}>
                 {communityStats.mostPopularGym.gym.brand}
               </p>
-              <p className="subtle" style={{ margin: 0, fontSize: '0.9rem' }}>
+              <p className="subtle text-sm" style={{ margin: 0 }}>
                 {communityStats.mostPopularGym.gym.city} • {communityStats.mostPopularGym.gym.name}
               </p>
-              <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.85rem', color: '#6b7280' }}>
+              <p className="subtle text-xs" style={{ margin: '0.75rem 0 0 0' }}>
                 Capacity: {communityStats.mostPopularGym.capacity} members
               </p>
             </div>
@@ -592,10 +567,10 @@ const CommunityStatsView = ({ communityStats }) => {
               <p style={{ fontSize: '2.5rem', fontWeight: '700', color: '#dc2626', margin: 0 }}>
                 {communityStats.mostPopularGym.estimatedOccupancy}%
               </p>
-              <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+              <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                 occupancy
               </p>
-              <p style={{ fontSize: '0.85rem', color: '#6b7280', margin: '0.5rem 0 0 0' }}>
+              <p className="subtle text-xs" style={{ margin: '0.5rem 0 0 0' }}>
                 {communityStats.mostPopularGym.recentCheckIns} people now
               </p>
             </div>
@@ -604,7 +579,7 @@ const CommunityStatsView = ({ communityStats }) => {
       )}
 
       {/* Active Gyms Leaderboard */}
-      <section className="card" style={{ marginBottom: '1.5rem' }}>
+      <section className="card section-stack">
         <h2>Gym Leaderboard</h2>
         <p className="subtle" style={{ margin: '0 0 1rem 0' }}>Based on recent community check-ins</p>
         {communityStats.gymsWithActivity.length === 0 ? (
@@ -617,19 +592,13 @@ const CommunityStatsView = ({ communityStats }) => {
               .map((item, idx) => (
                 <div 
                   key={idx}
-                  style={{
-                    padding: '1rem',
-                    borderBottom: idx < Math.min(10, communityStats.gymsWithActivity.length - 1) ? '1px solid #e5e7eb' : 'none',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                  }}
+                  className="list-item"
                 >
                   <div style={{ flex: 1 }}>
                     <p style={{ fontWeight: '600', margin: 0 }}>
                       #{idx + 1} {item.gym.brand}
                     </p>
-                    <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem' }}>
+                    <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                       {item.gym.name} • {item.gym.city}
                     </p>
                   </div>
@@ -637,7 +606,7 @@ const CommunityStatsView = ({ communityStats }) => {
                     <p style={{ fontWeight: '600', margin: 0, color: '#2563eb' }}>
                       {item.recentCheckIns}
                     </p>
-                    <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                    <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                       recent
                     </p>
                   </div>
@@ -692,12 +661,8 @@ const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync }) => {
   return (
     <div>
       {!isPremium ? (
-        <section className="card" style={{ 
-          backgroundColor: '#fef3c7', 
-          border: '2px solid #fbbf24',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <section className="card card--warm section-stack">
+          <div className="premium-hero">
             <div style={{ fontSize: '2.5rem' }}>✨</div>
             <div style={{ flex: 1 }}>
               <h2 style={{ margin: '0 0 0.5rem 0' }}>Unlock GymPulse Premium</h2>
@@ -707,28 +672,15 @@ const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync }) => {
             </div>
             <button
               onClick={onUpgrade}
-              style={{
-                padding: '0.75rem 2rem',
-                backgroundColor: '#f59e0b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.5rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
+              className="premium-cta"
             >
               Upgrade Now
             </button>
           </div>
         </section>
       ) : (
-        <section className="card" style={{ 
-          backgroundColor: '#d1fae5', 
-          border: '2px solid #10b981',
-          marginBottom: '1.5rem'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <section className="card card--success section-stack">
+          <div className="row-between">
             <div>
               <p style={{ margin: 0, fontWeight: '600', color: '#047857' }}>
                 ✓ Premium Active
@@ -739,16 +691,7 @@ const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync }) => {
             </div>
             <button
               onClick={onAppleHealthSync}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.9rem',
-                backgroundColor: '#10b981',
-                color: 'white',
-                border: 'none',
-                borderRadius: '0.375rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-              }}
+              className="premium-secondary"
             >
               Connect Apple Health
             </button>
@@ -765,8 +708,8 @@ const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
   
   if (!isPremium) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p style={{ fontSize: '1.2rem', color: '#6b7280', marginBottom: '1rem' }}>
+      <div className="empty-state">
+        <p style={{ marginBottom: '1rem' }}>
           Advanced Analytics requires Premium
         </p>
       </div>
@@ -776,11 +719,11 @@ const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
   return (
     <div>
       {/* Consistency Score */}
-      <section className="card" style={{ marginBottom: '1.5rem' }}>
+      <section className="card section-stack">
         <h2>Fitness Consistency Score</h2>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+        <div className="row-center" style={{ gap: '2rem' }}>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '3rem', fontWeight: '700', margin: 0, color: '#2563eb' }}>
+            <p className="score-number">
               {advancedAnalytics.consistencyScore}%
             </p>
             <p className="subtle" style={{ margin: '0.5rem 0 0 0' }}>
@@ -799,27 +742,22 @@ const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
       </section>
 
       {/* Weekly Forecast */}
-      <section className="card" style={{ marginBottom: '1.5rem' }}>
+      <section className="card section-stack">
         <h2>Next 7 Days Forecast</h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1rem', marginTop: '1rem' }}>
+        <div className="forecast-grid">
           {advancedAnalytics.forecastedCheckIns.map((forecast, idx) => (
             <div 
               key={idx}
-              style={{
-                padding: '1rem',
-                backgroundColor: idx === advancedAnalytics.bestDayOfWeek ? '#dbeafe' : '#f3f4f6',
-                borderRadius: '0.5rem',
-                textAlign: 'center',
-                border: idx === advancedAnalytics.bestDayOfWeek ? '2px solid #2563eb' : 'none',
-              }}
+              className="forecast-cell"
+              data-best={idx === advancedAnalytics.bestDayOfWeek ? 'true' : 'false'}
             >
               <p style={{ margin: 0, fontWeight: '600', fontSize: '0.9rem' }}>
                 {DAYS[idx]}
               </p>
-              <p style={{ margin: '0.5rem 0 0 0', fontSize: '1.5rem', fontWeight: '700', color: '#2563eb' }}>
+              <p className="forecast-count">
                 {forecast}
               </p>
-              <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+              <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                 {idx === advancedAnalytics.bestDayOfWeek ? '⭐ Best' : 'workouts'}
               </p>
             </div>
@@ -830,7 +768,7 @@ const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
       {/* Best Day Achievement */}
       <section className="card">
         <h2>Your Best Workout Day</h2>
-        <div style={{ padding: '1.5rem', backgroundColor: '#f0fdf4', borderRadius: '0.5rem', textAlign: 'center' }}>
+        <div className="best-day-card">
           <p style={{ fontSize: '2rem', margin: 0 }}>
             {DAYS[advancedAnalytics.bestDayOfWeek]}
           </p>
@@ -847,8 +785,8 @@ const AdvancedAnalyticsView = ({ advancedAnalytics, isPremium }) => {
 const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
   if (!isPremium) {
     return (
-      <div style={{ textAlign: 'center', padding: '2rem' }}>
-        <p style={{ fontSize: '1.2rem', color: '#6b7280', marginBottom: '1rem' }}>
+      <div className="empty-state">
+        <p style={{ marginBottom: '1rem' }}>
           Partnership Data requires Premium
         </p>
       </div>
@@ -857,27 +795,27 @@ const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
 
   return (
     <div>
-      <section className="card" style={{ marginBottom: '1.5rem', backgroundColor: '#eff6ff' }}>
+      <section className="card card--soft section-stack">
         <h2>Gym Partnership Data</h2>
         <p className="subtle" style={{ marginTop: 0 }}>
           Aggregated, anonymized insights for gym partners
         </p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginTop: '1rem' }}>
-          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
-            <p className="subtle" style={{ margin: 0 }}>Active Users</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#2563eb', margin: '0.5rem 0 0 0' }}>
+        <div className="stat-grid" style={{ marginTop: '1rem' }}>
+          <div className="card stat-card">
+            <p className="stat-label">Active Users</p>
+            <p className="stat-number" data-variant="blue">
               {partnershipData.summary.totalActiveUsers}
             </p>
           </div>
-          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
-            <p className="subtle" style={{ margin: 0 }}>Total Check-ins</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#059669', margin: '0.5rem 0 0 0' }}>
+          <div className="card stat-card">
+            <p className="stat-label">Total Check-ins</p>
+            <p className="stat-number" data-variant="green">
               {partnershipData.summary.totalCheckIns}
             </p>
           </div>
-          <div style={{ padding: '1rem', backgroundColor: 'white', borderRadius: '0.5rem' }}>
-            <p className="subtle" style={{ margin: 0 }}>Partnered Gyms</p>
-            <p style={{ fontSize: '2rem', fontWeight: '700', color: '#7c3aed', margin: '0.5rem 0 0 0' }}>
+          <div className="card stat-card">
+            <p className="stat-label">Partnered Gyms</p>
+            <p className="stat-number" data-variant="purple">
               {partnershipData.gynInsights.length}
             </p>
           </div>
@@ -886,20 +824,11 @@ const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
         <div style={{ marginTop: '1.5rem' }}>
           <button
             onClick={onExport}
-            style={{
-              padding: '0.75rem 2rem',
-              backgroundColor: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '0.5rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
+            className="primary-button"
           >
             📥 Download Partnership Data (JSON)
           </button>
-          <p className="subtle" style={{ margin: '1rem 0 0 0', fontSize: '0.85rem' }}>
+          <p className="subtle text-xs" style={{ margin: '1rem 0 0 0' }}>
             Format: Anonymized hourly/weekly patterns per gym
           </p>
         </div>
@@ -918,17 +847,14 @@ const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
               .map((gym, idx) => (
                 <div 
                   key={idx}
-                  style={{
-                    padding: '1rem',
-                    borderBottom: idx < 4 ? '1px solid #e5e7eb' : 'none',
-                  }}
+                  className="list-item"
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="list-row">
                     <div>
                       <p style={{ fontWeight: '600', margin: 0 }}>
                         #{idx + 1} {gym.gym.brand}
                       </p>
-                      <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.85rem' }}>
+                      <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                         {gym.gym.city} • {gym.metrics.uniqueUsers} members active
                       </p>
                     </div>
@@ -936,7 +862,7 @@ const PartnershipExportView = ({ partnershipData, isPremium, onExport }) => {
                       <p style={{ fontWeight: '600', margin: 0, color: '#2563eb', fontSize: '1.2rem' }}>
                         {gym.metrics.estimatedOccupancy}%
                       </p>
-                      <p className="subtle" style={{ margin: '0.25rem 0 0 0', fontSize: '0.8rem' }}>
+                      <p className="subtle text-xs" style={{ margin: '0.25rem 0 0 0' }}>
                         avg occupancy
                       </p>
                     </div>
@@ -987,6 +913,14 @@ function App() {
   const [checkInSuccess, setCheckInSuccess] = useState('');
   const [checkInLoading, setCheckInLoading] = useState(false);
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'analytics', or 'community'
+  const [expandedSections, setExpandedSections] = useState({}); // For progressive disclosure
+
+  const toggleSection = (sectionName) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
+    }));
+  };
 
   // Derived state
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
@@ -1189,122 +1123,93 @@ function App() {
           <div>
             <h1>GymPulse</h1>
             <p>Know when to go in under 5 seconds.</p>
-            
-            {/* Tab Navigation */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          </div>
+        </header>
+
+        <div className="control-panel" aria-label="View and location controls">
+          <div className="control-block">
+            <span className="control-label">View</span>
+            <div className="tabs">
               <button
                 onClick={() => setActiveView('dashboard')}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  backgroundColor: activeView === 'dashboard' ? '#2563eb' : '#f3f4f6',
-                  color: activeView === 'dashboard' ? 'white' : '#6b7280',
-                  transition: 'all 0.2s',
-                }}
+                className="tab-button"
+                data-active={activeView === 'dashboard' ? 'true' : 'false'}
               >
                 Dashboard
               </button>
               <button
                 onClick={() => setActiveView('analytics')}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  backgroundColor: activeView === 'analytics' ? '#2563eb' : '#f3f4f6',
-                  color: activeView === 'analytics' ? 'white' : '#6b7280',
-                  transition: 'all 0.2s',
-                }}
+                className="tab-button"
+                data-active={activeView === 'analytics' ? 'true' : 'false'}
               >
                 Analytics
               </button>
               <button
                 onClick={() => setActiveView('community')}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  backgroundColor: activeView === 'community' ? '#2563eb' : '#f3f4f6',
-                  color: activeView === 'community' ? 'white' : '#6b7280',
-                  transition: 'all 0.2s',
-                }}
+                className="tab-button"
+                data-active={activeView === 'community' ? 'true' : 'false'}
               >
                 Community
               </button>
               <button
                 onClick={() => setActiveView('premium')}
-                style={{
-                  padding: '0.5rem 1.5rem',
-                  fontSize: '0.95rem',
-                  fontWeight: '600',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  cursor: 'pointer',
-                  backgroundColor: activeView === 'premium' ? '#f59e0b' : '#f3f4f6',
-                  color: activeView === 'premium' ? 'white' : '#6b7280',
-                  transition: 'all 0.2s',
-                }}
+                className="tab-button"
+                data-active={activeView === 'premium' ? 'true' : 'false'}
+                data-variant="premium"
               >
                 Premium {isPremium ? '✓' : ''}
               </button>
             </div>
           </div>
-          
-          {/* Location Selectors - only show on dashboard view */}
+
           {activeView === 'dashboard' && (
-            <div className="location-selectors">
-            <label className="location-picker">
-              Province
-              <select 
-                value={province}
-                onChange={(e) => setProvince(e.target.value)}
-                aria-label="Select province"
-              >
-                {Object.entries(PROVINCES).map(([key, label]) => (
-                  <option key={key} value={label}>{label}</option>
-                ))}
-              </select>
-            </label>
+            <div className="control-block">
+              <span className="control-label">Location</span>
+              <div className="location-selectors">
+                <label className="location-picker">
+                  Province
+                  <select 
+                    value={province}
+                    onChange={(e) => setProvince(e.target.value)}
+                    aria-label="Select province"
+                  >
+                    {Object.entries(PROVINCES).map(([key, label]) => (
+                      <option key={key} value={label}>{label}</option>
+                    ))}
+                  </select>
+                </label>
 
-            <label className="location-picker">
-              City
-              <select 
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                aria-label="Select city"
-              >
-                {cities.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </label>
+                <label className="location-picker">
+                  City
+                  <select 
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    aria-label="Select city"
+                  >
+                    {cities.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </label>
 
-            <label className="location-picker">
-              Gym
-              <select 
-                value={gymId}
-                onChange={(e) => setGymId(e.target.value)}
-                aria-label="Select gym"
-              >
-                {gyms.map((gym) => (
-                  <option key={gym.id} value={gym.id}>
-                    {gym.brand} - {gym.name.split(' ').slice(-1)[0]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+                <label className="location-picker">
+                  Gym
+                  <select 
+                    value={gymId}
+                    onChange={(e) => setGymId(e.target.value)}
+                    aria-label="Select gym"
+                  >
+                    {gyms.map((gym) => (
+                      <option key={gym.id} value={gym.id}>
+                        {gym.brand} - {gym.name.split(' ').slice(-1)[0]}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+            </div>
           )}
-        </header>
+        </div>
 
         <div id="main-content">
           {activeView === 'premium' ? (
@@ -1314,7 +1219,7 @@ function App() {
                 onUpgrade={handlePremiumUpgrade}
                 onAppleHealthSync={requestAppleHealthAccess}
               />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <div className="premium-grid">
                 <div>
                   <h2 style={{ marginTop: 0 }}>Advanced Analytics</h2>
                   <AdvancedAnalyticsView 
@@ -1354,19 +1259,7 @@ function App() {
                 <>
                   {/* Peak Hour Alert Notification */}
                   {showAlert && (
-                    <div 
-                      style={{
-                        padding: '1rem',
-                        backgroundColor: '#d1fae5',
-                        border: '2px solid #059669',
-                        borderRadius: '0.5rem',
-                        marginBottom: '1rem',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                      }}
-                      role="alert"
-                    >
+                    <div className="alert-banner" role="alert">
                       <div>
                         <p style={{ margin: 0, fontWeight: '600', color: '#065f46' }}>
                           🎉 Great time to visit!
@@ -1377,15 +1270,6 @@ function App() {
                       </div>
                       <button
                         onClick={() => setShowAlert(false)}
-                        style={{
-                          padding: '0.25rem 0.75rem',
-                          fontSize: '0.85rem',
-                          border: 'none',
-                          borderRadius: '0.25rem',
-                          cursor: 'pointer',
-                          backgroundColor: '#059669',
-                          color: 'white',
-                        }}
                       >
                         Dismiss
                       </button>
@@ -1402,12 +1286,27 @@ function App() {
                     checkInSuccess={checkInSuccess}
                     checkInLoading={checkInLoading}
                   />
-                  <div className="grid">
-                    <TrendChartCard trend={trend} />
-                    <PredictionChartCard predictions={predictions} />
-                  </div>
-                  <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
                   <div className="recommendation" role="status" aria-live="polite">{bestVisitText}</div>
+
+                  <section className="card section-stack">
+                    <div className="row-between">
+                      <h2>Patterns & Insights</h2>
+                      <button
+                        className="expand-button"
+                        onClick={() => toggleSection('charts')}
+                        aria-label="Toggle patterns and insights visibility"
+                      >
+                        {expandedSections.charts ? '−' : '+'} Details
+                      </button>
+                    </div>
+                    <div className="collapsible-section" data-open={expandedSections.charts ? 'true' : 'false'}>
+                      <div className="grid" style={{ marginTop: '1rem' }}>
+                        <TrendChartCard trend={trend} />
+                        <PredictionChartCard predictions={predictions} />
+                      </div>
+                      <WeeklyHeatmapCard weeklyHeatmap={weeklyHeatmap} />
+                    </div>
+                  </section>
                 </>
               )}
             </>
