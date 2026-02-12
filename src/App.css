@@ -717,10 +717,122 @@ button:active {
   opacity: 0.7;
 }
 
-/* Responsive typography */
-@media (max-width: 640px) {
+/* ===== TABLET RESPONSIVENESS (max-width: 768px) ===== */
+@media (max-width: 768px) {
+  .app-shell {
+    padding: 1.2rem 0.8rem 2.5rem;
+  }
+
   header h1 {
-    font-size: clamp(1.7rem, 6vw, 2.2rem);
+    font-size: clamp(1.9rem, 5vw, 2.8rem);
+  }
+
+  .control-panel {
+    gap: 1.5rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .control-block {
+    flex: 1;
+    min-width: 160px;
+  }
+
+  .location-selectors {
+    gap: 0.6rem;
+  }
+
+  .location-picker select {
+    min-width: 120px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.9rem;
+  }
+
+  .card {
+    padding: 1.1rem 1.2rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.9rem;
+  }
+
+  .stat-card {
+    padding: 0.85rem;
+  }
+
+  .stat-number {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+
+  .premium-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .check-in-button {
+    padding: 1rem 2.5rem;
+    font-size: 1rem;
+    min-height: 50px;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1.4rem;
+    font-size: 0.9rem;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+  }
+
+  .forecast-cell {
+    padding: 0.8rem 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .premium-cta {
+    padding: 0.65rem 1.8rem;
+    font-size: 0.95rem;
+  }
+
+  .primary-button {
+    padding: 0.65rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .ghost-button {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.8rem;
+  }
+
+  .alert-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .heatmap-header,
+  .heatmap-row {
+    grid-template-columns: 60px repeat(6, minmax(50px, 1fr));
+    font-size: 0.8rem;
+  }
+
+  .best-day-card {
+    padding: 1.2rem;
+  }
+}
+
+/* ===== PHONE RESPONSIVENESS (max-width: 640px) ===== */
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 1rem 0.7rem 2rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.6rem, 5vw, 2rem);
+  }
+
+  header p {
+    font-size: 0.95rem;
   }
 
   h2 {
@@ -730,13 +842,435 @@ button:active {
   .title-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .control-panel {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 0.8rem;
+    margin-top: 1rem;
+  }
+
+  .control-block {
+    gap: 0.5rem;
+  }
+
+  .control-label {
+    font-size: 0.65rem;
+  }
+
+  .location-selectors {
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .location-picker {
+    width: 100%;
   }
 
   .location-picker select {
-    min-width: 100%;
+    width: 100%;
+    min-width: unset;
+    padding: 0.6rem 0.7rem;
+    font-size: 0.95rem;
+  }
+
+  .card {
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 16px;
+  }
+
+  .card-header {
+    gap: 0.6rem;
+  }
+
+  h3 {
+    font-size: 0.95rem;
+  }
+
+  .tabs {
+    gap: 0.5rem;
+  }
+
+  .tab-button {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+    flex: 1;
+    text-align: center;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.7rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-card {
+    padding: 0.7rem;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
+
+  .stat-number {
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    margin: 0.3rem 0 0 0;
+  }
+
+  .big-number {
+    font-size: clamp(1.8rem, 8vw, 2.8rem);
+  }
+
+  .check-in-button {
+    width: 100%;
+    padding: 0.9rem 2rem;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  .premium-grid {
+    gap: 1rem;
+  }
+
+  .premium-hero {
+    gap: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .premium-cta {
+    width: 100%;
+    padding: 0.65rem 1.5rem;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+
+  .premium-secondary {
+    width: 100%;
+    padding: 0.55rem 1.2rem;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  .primary-button {
+    width: 100%;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  .ghost-button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+
+  .forecast-cell {
+    padding: 0.7rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .forecast-count {
+    font-size: 1.2rem;
+  }
+
+  .score-number {
+    font-size: 2.2rem;
+  }
+
+  .alert-banner {
+    padding: 0.8rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .alert-banner button {
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .row-between {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .row-center {
+    flex-wrap: wrap;
+  }
+
+  .heatmap {
+    margin-top: 0.8rem;
+  }
+
+  .heatmap-header,
+  .heatmap-row {
+    grid-template-columns: 50px repeat(6, minmax(40px, 1fr));
+    gap: 0.25rem;
+    font-size: 0.7rem;
+  }
+
+  .heat-cell {
+    padding: 0.35rem 0.1rem;
+    font-size: 0.65rem;
+  }
+
+  .day-label {
+    font-size: 0.8rem;
+  }
+
+  .scroll-area {
+    max-height: 350px;
+  }
+
+  .list-item {
+    padding: 0.8rem;
+  }
+
+  .list-row {
+    gap: 0.6rem;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.6rem;
+  }
+
+  .confidence-box {
+    padding: 0.7rem;
+  }
+
+  .recommendation {
+    padding: 0.85rem 1rem;
+    margin: 1rem 0 0;
+  }
+
+  .expand-button {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+  }
+
+  .best-day-card {
+    padding: 1rem;
+  }
+
+  .empty-state {
+    padding: 1.5rem;
+  }
+
+  .toggle-row {
+    margin-bottom: 0.8rem;
+  }
+
+  .toggle-input {
+    width: 16px;
+    height: 16px;
+  }
+
+  .section-divider {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+  }
+
+  .section-stack {
+    margin-bottom: 1rem;
   }
 }
 
+/* ===== SMALL PHONE RESPONSIVENESS (max-width: 480px) ===== */
+@media (max-width: 480px) {
+  .app-shell {
+    padding: 0.8rem 0.6rem 1.5rem;
+  }
+
+  header h1 {
+    font-size: clamp(1.4rem, 4vw, 1.8rem);
+  }
+
+  header p {
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+  }
+
+  h2 {
+    font-size: 0.95rem;
+  }
+
+  .control-panel {
+    gap: 0.8rem;
+    padding: 0.7rem;
+    margin-top: 0.8rem;
+  }
+
+  .control-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+
+  .location-picker select {
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  .card {
+    padding: 0.85rem;
+    margin-top: 0.8rem;
+    border-radius: 14px;
+  }
+
+  .tabs {
+    gap: 0.4rem;
+  }
+
+  .tab-button {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .stat-card {
+    padding: 0.6rem;
+  }
+
+  .stat-number {
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+  }
+
+  .big-number {
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+  }
+
+  .check-in-button {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.85rem;
+    min-height: 44px;
+  }
+
+  .premium-cta {
+    padding: 0.55rem 1.2rem;
+    font-size: 0.8rem;
+  }
+
+  .primary-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .forecast-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.4rem;
+  }
+
+  .forecast-cell {
+    padding: 0.6rem 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .forecast-count {
+    font-size: 1rem;
+  }
+
+  .score-number {
+    font-size: 1.8rem;
+  }
+
+  .heatmap-header,
+  .heatmap-row {
+    grid-template-columns: 45px repeat(6, minmax(35px, 1fr));
+    gap: 0.2rem;
+    font-size: 0.65rem;
+  }
+
+  .heat-cell {
+    padding: 0.3rem 0.05rem;
+    font-size: 0.6rem;
+  }
+
+  .alert-banner {
+    padding: 0.7rem;
+    gap: 0.5rem;
+  }
+
+  .alert-banner button {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .list-item {
+    padding: 0.7rem;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .confidence-box {
+    padding: 0.6rem;
+  }
+
+  .recommendation {
+    padding: 0.7rem 0.85rem;
+  }
+
+  .best-day-card {
+    padding: 0.85rem;
+  }
+
+  .expand-button {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .text-sm {
+    font-size: 0.8rem;
+  }
+
+  .text-xs {
+    font-size: 0.7rem;
+  }
+
+  .empty-state {
+    padding: 1.2rem;
+  }
+
+  .row-between {
+    gap: 0.5rem;
+  }
+
+  .row-center {
+    gap: 0.5rem;
+  }
+
+  .scroll-area {
+    max-height: 300px;
+  }
+}
+
+/* ===== RESPONSIVE TYPOGRAPHY DEFAULTS ===== */
 @media (max-width: 900px) {
   .premium-grid {
     grid-template-columns: 1fr;
