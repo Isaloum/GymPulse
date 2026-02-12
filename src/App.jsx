@@ -914,6 +914,26 @@ function App() {
   const [checkInLoading, setCheckInLoading] = useState(false);
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'analytics', or 'community'
   const [expandedSections, setExpandedSections] = useState({}); // For progressive disclosure
+  const [isPremium, setIsPremium] = useState(() => {
+    const saved = localStorage.getItem('gymPulsePremium');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [hasAppleHealthAccess, setHasAppleHealthAccess] = useState(() => {
+    const saved = localStorage.getItem('gymPulseAppleHealth');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [alertPreferences, setAlertPreferences] = useState(() => {
+    const saved = localStorage.getItem('gymPulseAlertPrefs');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return { enabled: false, threshold: 40, gymId: null };
+      }
+    }
+    return { enabled: false, threshold: 40, gymId: null };
+  });
+  const [showAlert, setShowAlert] = useState(false);
 
   const toggleSection = (sectionName) => {
     setExpandedSections(prev => ({
