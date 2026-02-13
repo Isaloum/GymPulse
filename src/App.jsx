@@ -46,6 +46,12 @@ import {
   subscribeToGymSensor,
   unsubscribeFromGym,
 } from './supabase';
+import {
+  PRICING_PLANS,
+  isStripeConfigured,
+  redirectToCheckout,
+  mockCheckout,
+} from './stripe';
 
 // Error Boundary: Catches component errors and displays a friendly message
 class ErrorBoundary extends React.Component {
@@ -664,37 +670,168 @@ const CommunityStatsView = ({ communityStats }) => {
   );
 };
 
-// Premium Paywall Component
-const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync }) => {
+// Premium Paywall Component with Stripe Pricing
+const PremiumPaywall = ({ isPremium, onUpgrade, onAppleHealthSync, loading }) => {
+  const [selectedPlan, setSelectedPlan] = React.useState('monthly');
+  
   return (
     <div>
       {!isPremium ? (
-        <section className="card card--warm section-stack">
-          <div className="premium-hero">
-            <div style={{ fontSize: '2.5rem' }}>✨</div>
-            <div style={{ flex: 1 }}>
-              <h2 style={{ margin: '0 0 0.5rem 0' }}>Unlock GymPulse Premium</h2>
-              <p className="subtle" style={{ margin: 0 }}>
-                Advanced analytics, health integration, partnership data exports
+        <>
+          {/* Hero Section */}
+          <section className="card card--warm section-stack">
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✨</div>
+              <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '2rem' }}>
+                Unlock GymPulse Premium
+              </h2>
+              <p className="subtle" style={{ margin: 0, fontSize: '1.1rem' }}>
+                Get advanced insights, health integration, and exclusive features
               </p>
             </div>
-            <button
-              onClick={onUpgrade}
-              className="premium-cta"
+          </section>
+
+          {/* Pricing Cards */}
+          <div className="premium-grid" style={{ marginTop: '1.5rem' }}>
+            {/* Monthly Plan */}
+            <section 
+              className={`card ${selectedPlan === 'monthly' ? 'card--soft' : ''}`}
+              style={{ 
+                cursor: 'pointer',
+                border: selectedPlan === 'monthly' ? '2px solid #0ea5e9' : undefined,
+                position: 'relative'
+              }}
+              onClick={() => setSelectedPlan('monthly')}
             >
-              Upgrade Now
-            </button>
+              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 0.25rem 0' }}>{PRICING_PLANS.monthly.name}</h3>
+                  <p className="subtle" style={{ margin: 0, fontSize: '0.9rem' }}>Best for trying it out</p>
+                </div>
+                {selectedPlan === 'monthly' && (
+                  <span style={{ 
+                    background: '#0ea5e9', 
+                    color: 'white', 
+                    padding: '0.25rem 0.5rem', 
+                    borderRadius: '999px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600'
+                  }}>
+                    SELECTED
+                  </span>
+                )}
+              </div>
+              <div style={{ margin: '1.5rem 0' }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: '700', color: '#0ea5e9' }}>
+                  ${PRICING_PLANS.monthly.price}
+                </span>
+                <span className="subtle">/{PRICING_PLANS.monthly.interval}</span>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
+                {PRICING_PLANS.monthly.features.map((feature, idx) => (
+                  <li key={idx} style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: '#10b981' }}>✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Yearly Plan */}
+            <section 
+              className={`card ${selectedPlan === 'yearly' ? 'card--success' : ''}`}
+              style={{ 
+                cursor: 'pointer',
+                border: selectedPlan === 'yearly' ? '2px solid #10b981' : undefined,
+                position: 'relative'
+              }}
+              onClick={() => setSelectedPlan('yearly')}
+            >
+              {selectedPlan === 'yearly' && (
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '-12px', 
+                  right: '20px',
+                  background: '#10b981',
+                  color: 'white',
+                  padding: '0.35rem 0.75rem',
+                  borderRadius: '999px',
+                  fontSize: '0.75rem',
+                  fontWeight: '700',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)'
+                }}>
+                  {PRICING_PLANS.yearly.savings}
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ margin: '0 0 0.25rem 0' }}>{PRICING_PLANS.yearly.name}</h3>
+                  <p className="subtle" style={{ margin: 0, fontSize: '0.9rem' }}>Best value - Save $10</p>
+                </div>
+                {selectedPlan === 'yearly' && (
+                  <span style={{ 
+                    background: '#10b981', 
+                    color: 'white', 
+                    padding: '0.25rem 0.5rem', 
+                    borderRadius: '999px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600'
+                  }}>
+                    SELECTED
+                  </span>
+                )}
+              </div>
+              <div style={{ margin: '1.5rem 0' }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: '700', color: '#10b981' }}>
+                  ${PRICING_PLANS.yearly.price}
+                </span>
+                <span className="subtle">/{PRICING_PLANS.yearly.interval}</span>
+                <p className="subtle" style={{ margin: '0.5rem 0 0 0', fontSize: '0.85rem' }}>
+                  Just ${(PRICING_PLANS.yearly.price / 12).toFixed(2)}/month
+                </p>
+              </div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: '1rem 0' }}>
+                {PRICING_PLANS.yearly.features.map((feature, idx) => (
+                  <li key={idx} style={{ padding: '0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span style={{ color: '#10b981' }}>✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
           </div>
-        </section>
+
+          {/* CTA Button */}
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button
+              onClick={() => onUpgrade(selectedPlan)}
+              className="premium-cta"
+              disabled={loading}
+              style={{ 
+                fontSize: '1.1rem', 
+                padding: '1rem 3rem',
+                opacity: loading ? 0.6 : 1,
+                cursor: loading ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {loading ? 'Processing...' : `Get Premium - ${selectedPlan === 'monthly' ? '$4.99/mo' : '$49.99/yr'}`}
+            </button>
+            <p className="subtle text-xs" style={{ marginTop: '1rem' }}>
+              {isStripeConfigured() 
+                ? '🔒 Secure payment via Stripe • Cancel anytime' 
+                : '⚠️ Demo mode - Real payments not configured'}
+            </p>
+          </div>
+        </>
       ) : (
         <section className="card card--success section-stack">
           <div className="row-between">
             <div>
-              <p style={{ margin: 0, fontWeight: '600', color: '#047857' }}>
+              <p style={{ margin: 0, fontWeight: '600', color: '#047857', fontSize: '1.1rem' }}>
                 ✓ Premium Active
               </p>
-              <p className="subtle" style={{ margin: '0.25rem 0 0 0', color: '#065f46' }}>
-                All premium features unlocked
+              <p className="subtle" style={{ margin: '0.5rem 0 0 0', color: '#065f46' }}>
+                All premium features unlocked • Manage subscription in settings
               </p>
             </div>
             <button
@@ -1152,12 +1289,32 @@ function App() {
   const advancedAnalytics = useMemo(() => calculateAdvancedAnalytics(analytics, checkIns), [analytics, checkIns]);
   const partnershipData = useMemo(() => generatePartnershipDataExport(communityStats, checkIns, getGymById), [communityStats, checkIns]);
 
-  // Premium membership handler
-  const handlePremiumUpgrade = () => {
-    // In production: integrate Stripe, RevenueCat, or other payment platform
-    // For MVP: mock upgrade
-    setIsPremium(true);
-    localStorage.setItem('gymPulsePremium', JSON.stringify(true));
+  // Premium membership handler with Stripe integration
+  const handlePremiumUpgrade = async (planId) => {
+    const plan = PRICING_PLANS[planId];
+    if (!plan) return;
+    
+    setCheckInLoading(true);
+    
+    try {
+      if (isStripeConfigured()) {
+        // Use real Stripe checkout
+        await redirectToCheckout(plan.priceId, userId);
+      } else {
+        // Mock checkout for development
+        await mockCheckout(planId, userId);
+        setIsPremium(true);
+        localStorage.setItem('gymPulsePremium', JSON.stringify(true));
+        setCheckInSuccess('✓ Premium activated (Mock mode)');
+        setTimeout(() => setCheckInSuccess(''), 3000);
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      setCheckInSuccess('⚠️ Payment failed. Try again.');
+      setTimeout(() => setCheckInSuccess(''), 3000);
+    } finally {
+      setCheckInLoading(false);
+    }
   };
 
   // Export partnership data
@@ -1213,6 +1370,27 @@ function App() {
       setShowAlert(false);
     }
   }, [live, alertPreferences, gymId]);
+
+  // Handle Stripe payment success/cancel redirects
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    
+    if (params.get('success') === 'true') {
+      setIsPremium(true);
+      localStorage.setItem('gymPulsePremium', JSON.stringify(true));
+      setCheckInSuccess('✓ Premium activated! Welcome aboard.');
+      setTimeout(() => setCheckInSuccess(''), 5000);
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    
+    if (params.get('canceled') === 'true') {
+      setCheckInSuccess('Payment canceled. Upgrade anytime!');
+      setTimeout(() => setCheckInSuccess(''), 3000);
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -1349,6 +1527,7 @@ function App() {
                 isPremium={isPremium}
                 onUpgrade={handlePremiumUpgrade}
                 onAppleHealthSync={requestAppleHealthAccess}
+                loading={checkInLoading}
               />
               <div className="premium-grid">
                 <div>
