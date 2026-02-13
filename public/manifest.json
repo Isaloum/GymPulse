@@ -1,0 +1,20 @@
+{
+  "name": "GymPulse - Real-time Gym Occupancy Tracker",
+  "short_name": "GymPulse",
+  "description": "Check gym crowd levels and peak times before you go",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["fitness", "health", "lifestyle"],
+  "screenshots": []
+}

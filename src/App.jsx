@@ -38,6 +38,14 @@ import {
   getGymById,
   getGymCapacity,
 } from './gymsDatabase';
+import {
+  submitCheckIn,
+  hasRecentCheckIn,
+  fetchUserCheckIns,
+  getCurrentOccupancy,
+  subscribeToGymSensor,
+  unsubscribeFromGym,
+} from './supabase';
 
 // Error Boundary: Catches component errors and displays a friendly message
 class ErrorBoundary extends React.Component {
@@ -914,6 +922,8 @@ function App() {
   const [checkInLoading, setCheckInLoading] = useState(false);
   const [activeView, setActiveView] = useState('dashboard'); // 'dashboard', 'analytics', or 'community'
   const [expandedSections, setExpandedSections] = useState({}); // For progressive disclosure
+  const [useSupabase, setUseSupabase] = useState(true); // Toggle for backend integration
+  const [realtimeOccupancy, setRealtimeOccupancy] = useState(null); // Live sensor data
   const [isPremium, setIsPremium] = useState(() => {
     const saved = localStorage.getItem('gymPulsePremium');
     return saved ? JSON.parse(saved) : false;
@@ -946,22 +956,9 @@ function App() {
   const cities = useMemo(() => getCitiesByProvince(province), [province]);
   const gyms = useMemo(() => getGymsByProvinceAndCity(province, city), [province, city]);
   
-  // Check-in handler with GPS proximity validation
+  // Check-in handler with GPS proximity validation + Supabase integration
   const handleCheckIn = async () => {
     const now = Date.now();
-    const hourAgo = now - 60 * 60 * 1000;
-    
-    // Prevent spam: max 1 check-in per gym per hour
-    const recentCheckIn = checkIns.find(
-      c => c.gymId === gymId && c.timestamp > hourAgo
-    );
-    
-    if (recentCheckIn) {
-      const minutesRemaining = Math.ceil((recentCheckIn.timestamp + 60 * 60 * 1000 - now) / 60000);
-      setCheckInSuccess(`Already checked in. Try again in ${minutesRemaining} min.`);
-      setTimeout(() => setCheckInSuccess(''), 3000);
-      return;
-    }
     
     setCheckInLoading(true);
     
@@ -995,14 +992,39 @@ function App() {
         return;
       }
       
-      // Valid check-in - save it
-      const newCheckIn = { gymId, timestamp: now, userId, distance: Math.round(distance) };
-      const updated = [...checkIns, newCheckIn];
-      setCheckIns(updated);
-      localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
-      
-      setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'}`);
-      setTimeout(() => setCheckInSuccess(''), 3000);
+      // Try to submit to Supabase (if enabled and configured)
+      if (useSupabase) {
+        try {
+          // Check for recent check-in in database
+          const recent = await hasRecentCheckIn(gymId, userId, 60);
+          if (recent) {
+            const minutesRemaining = Math.ceil((new Date(recent.timestamp).getTime() + 60 * 60 * 1000 - now) / 60000);
+            setCheckInSuccess(`Already checked in. Try again in ${minutesRemaining} min.`);
+            setTimeout(() => setCheckInSuccess(''), 3000);
+            setCheckInLoading(false);
+            return;
+          }
+          
+          // Submit to database
+          await submitCheckIn(gymId, userId, Math.round(distance));
+          
+          // Also update local state for immediate feedback
+          const newCheckIn = { gymId, timestamp: now, userId, distance: Math.round(distance) };
+          const updated = [...checkIns, newCheckIn];
+          setCheckIns(updated);
+          localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
+          
+          setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'} (Shared)`);
+          setTimeout(() => setCheckInSuccess(''), 3000);
+        } catch (supabaseError) {
+          console.warn('Supabase check-in failed, falling back to local:', supabaseError);
+          // Fallback to local-only check-in
+          await handleLocalCheckIn(now, distance, gym);
+        }
+      } else {
+        // Local-only mode
+        await handleLocalCheckIn(now, distance, gym);
+      }
     } catch (error) {
       if (error.code === 1) {
         setCheckInSuccess('⚠️ Enable location access to check in');
@@ -1017,6 +1039,32 @@ function App() {
     } finally {
       setCheckInLoading(false);
     }
+  };
+  
+  // Local-only check-in (fallback when Supabase unavailable)
+  const handleLocalCheckIn = async (now, distance, gym) => {
+    const hourAgo = now - 60 * 60 * 1000;
+    
+    // Prevent spam: max 1 check-in per gym per hour (local validation)
+    const recentCheckIn = checkIns.find(
+      c => c.gymId === gymId && c.timestamp > hourAgo
+    );
+    
+    if (recentCheckIn) {
+      const minutesRemaining = Math.ceil((recentCheckIn.timestamp + 60 * 60 * 1000 - now) / 60000);
+      setCheckInSuccess(`Already checked in. Try again in ${minutesRemaining} min.`);
+      setTimeout(() => setCheckInSuccess(''), 3000);
+      return;
+    }
+    
+    // Valid check-in - save locally
+    const newCheckIn = { gymId, timestamp: now, userId, distance: Math.round(distance) };
+    const updated = [...checkIns, newCheckIn];
+    setCheckIns(updated);
+    localStorage.setItem('gymPulseCheckIns', JSON.stringify(updated));
+    
+    setCheckInSuccess(`✓ Checked in at ${gym?.brand || 'gym'} (Local)`);
+    setTimeout(() => setCheckInSuccess(''), 3000);
   };
   
   // Reset city when province changes
@@ -1034,6 +1082,69 @@ function App() {
       setGymId(newGyms[0].id);
     }
   }, [province, city, gymId]);
+
+  // Load user check-ins from Supabase on mount (if enabled)
+  useEffect(() => {
+    if (!useSupabase) return;
+    
+    const loadCheckIns = async () => {
+      try {
+        const userCheckIns = await fetchUserCheckIns(userId, 100);
+        if (userCheckIns && userCheckIns.length > 0) {
+          // Convert Supabase format to local format
+          const formatted = userCheckIns.map(ci => ({
+            gymId: ci.gym_id,
+            timestamp: new Date(ci.timestamp).getTime(),
+            userId: ci.user_id,
+            distance: ci.distance_meters
+          }));
+          setCheckIns(formatted);
+          localStorage.setItem('gymPulseCheckIns', JSON.stringify(formatted));
+        }
+      } catch (error) {
+        console.warn('Could not load check-ins from Supabase:', error);
+        // Continue with local data
+      }
+    };
+    
+    loadCheckIns();
+  }, [userId, useSupabase]);
+
+  // Subscribe to real-time sensor updates for current gym
+  useEffect(() => {
+    if (!useSupabase || !gymId) return;
+    
+    let subscription;
+    
+    const setupRealtimeSubscription = async () => {
+      try {
+        // Get initial sensor data
+        const initialData = await getCurrentOccupancy(gymId);
+        if (initialData) {
+          setRealtimeOccupancy(initialData);
+        }
+        
+        // Subscribe to updates
+        subscription = subscribeToGymSensor(gymId, (newReading) => {
+          setRealtimeOccupancy({
+            occupancy_count: newReading.occupancy_count,
+            data_source: 'sensor',
+            last_updated: newReading.reading_timestamp
+          });
+        });
+      } catch (error) {
+        console.warn('Could not setup real-time subscription:', error);
+      }
+    };
+    
+    setupRealtimeSubscription();
+    
+    return () => {
+      if (subscription) {
+        unsubscribeFromGym(subscription);
+      }
+    };
+  }, [gymId, useSupabase]);
 
   const bestVisitText = useMemo(() => getBestVisitWindow(predictions), [predictions]);
   const analytics = useMemo(() => analyzeCheckIns(checkIns, getGymById), [checkIns]);
