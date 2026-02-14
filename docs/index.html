@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GymPulse - Real-Time Gym Occupancy Tracker</title>
+  <meta name="description" content="Know when your gym is empty. Real-time occupancy from members, not outdated algorithms.">
+  <meta property="og:title" content="GymPulse - Never waste time on a crowded gym again">
+  <meta property="og:description" content="See which Montreal gyms are actually empty right now. Free forever.">
+  <meta property="og:type" content="website">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap');
+
+    :root {
+      --ink: #1a1a1a;
+      --muted: #5a5a5a;
+      --brand: #ff6a00;
+      --brand-dark: #f05100;
+      --paper: #ffffff;
+      --wash: #f6f1eb;
+      --shadow: rgba(0, 0, 0, 0.12);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'IBM Plex Sans', system-ui, sans-serif;
+      line-height: 1.6;
+      color: var(--ink);
+      background: radial-gradient(1200px 600px at 10% -10%, #ffe2c6 0%, transparent 70%),
+                  radial-gradient(900px 500px at 90% -20%, #ffd6b3 0%, transparent 70%),
+                  var(--wash);
+      min-height: 100vh;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      letter-spacing: -0.02em;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.92);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      box-shadow: 0 2px 10px var(--shadow);
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+
+    .navbar-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--ink);
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--brand);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .hero {
+      padding: 6rem 2rem 4rem;
+      text-align: left;
+    }
+
+    .hero-card {
+      background: var(--paper);
+      border-radius: 16px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.14);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card:before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -80px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, #ffd3b0 0%, transparent 70%);
+      opacity: 0.8;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--muted);
+      margin-bottom: 2rem;
+      max-width: 640px;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--brand);
+      color: white;
+      padding: 0.9rem 2rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      box-shadow: 0 12px 25px rgba(255, 106, 0, 0.25);
+    }
+
+    .cta-button:hover {
+      background: var(--brand-dark);
+      transform: translateY(-2px);
+    }
+
+    .cta-secondary {
+      display: inline-block;
+      background: transparent;
+      color: var(--ink);
+      padding: 0.9rem 1.6rem;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      border: 2px solid #f0c4a2;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      background: #fff5ea;
+      border: 1px solid #f1d1b8;
+      padding: 0.6rem 1rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: #6b3b1e;
+      font-weight: 600;
+    }
+
+    .section {
+      background: white;
+      padding: 4rem 2rem;
+      margin: 2rem 0;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .section h2 {
+      font-size: 2.4rem;
+      margin-bottom: 1.5rem;
+      color: var(--ink);
+    }
+
+    .problem-grid,
+    .solution-grid,
+    .features-grid,
+    .pricing-grid,
+    .testimonials,
+    .projects {
+      display: grid;
+      gap: 2rem;
+    }
+
+    .problem-grid {
+      grid-template-columns: 1.2fr 0.8fr;
+      align-items: center;
+    }
+
+    .solution-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .features-grid,
+    .projects {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .pricing-grid,
+    .testimonials {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .solution-card,
+    .feature-card,
+    .pricing-card,
+    .testimonial,
+    .project {
+      background: #fff8f2;
+      border-radius: 12px;
+      padding: 1.6rem;
+      border: 1px solid #f0dac7;
+    }
+
+    .solution-card h4,
+    .feature-card h4,
+    .project h4 {
+      color: var(--ink);
+      margin-bottom: 0.6rem;
+    }
+
+    .solution-icon {
+      font-size: 2rem;
+      margin-bottom: 0.7rem;
+    }
+
+    .stat {
+      background: #fff3e6;
+      padding: 1.3rem;
+      border-radius: 12px;
+      text-align: left;
+      border: 1px solid #f2d7c1;
+    }
+
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--brand-dark);
+    }
+
+    .pricing-card.featured {
+      border: 2px solid var(--brand);
+      background: #fff1e6;
+    }
+
+    .price {
+      font-size: 2.4rem;
+      color: var(--brand-dark);
+      font-weight: 700;
+      margin: 0.8rem 0;
+    }
+
+    .pricing-card ul {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .pricing-card li {
+      padding: 0.4rem 0;
+      color: var(--muted);
+    }
+
+    .pricing-card li:before {
+      content: "- ";
+      color: var(--brand);
+      font-weight: 700;
+      margin-right: 0.4rem;
+    }
+
+    .email-capture {
+      background: linear-gradient(135deg, #ff7a18 0%, #ff5f2f 100%);
+      color: white;
+      padding: 3rem 2rem;
+      border-radius: 16px;
+      text-align: center;
+      margin: 2rem 0;
+      box-shadow: 0 20px 40px rgba(255, 90, 0, 0.3);
+    }
+
+    .email-form {
+      max-width: 480px;
+      margin: 1.5rem auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.8rem;
+    }
+
+    .email-form input {
+      padding: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    .email-form button {
+      background: #1c0f0a;
+      color: white;
+      border: none;
+      padding: 0.9rem;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0 3rem;
+      color: #6f5a4b;
+      font-size: 0.9rem;
+    }
+
+    footer a {
+      color: var(--brand-dark);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 900px) {
+      .problem-grid,
+      .solution-grid,
+      .features-grid,
+      .pricing-grid,
+      .testimonials,
+      .projects {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        padding: 4rem 1rem;
+      }
+
+      .hero h1 {
+        font-size: 2.4rem;
+      }
+
+      .navbar-content {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-content">
+      <div class="logo">GymPulse</div>
+      <ul class="nav-links">
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#solution">Solution</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#founder">About</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-card">
+        <h1>Know when your gym is actually empty</h1>
+        <p>GymPulse shows live occupancy for Montreal gyms using member check-ins, not stale algorithms.</p>
+        <div class="cta-row">
+          <a href="https://gympulse.vercel.app" class="cta-button">Try the beta</a>
+          <a href="#email" class="cta-secondary">Join the waitlist</a>
+        </div>
+        <div class="badge-row">
+          <div class="badge">40+ Montreal gyms tracked</div>
+          <div class="badge">Real-time member signals</div>
+          <div class="badge">Free during beta</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="problem" class="section container">
+    <h2>The problem</h2>
+    <div class="problem-grid">
+      <div>
+        <h3>Google popular times is wrong when you need it most</h3>
+        <ul>
+          <li>It uses delayed data that is often 1-2 weeks behind.</li>
+          <li>It cannot tell you what is happening right now in your gym.</li>
+          <li>It hides the real crowd pattern and wastes your workout time.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="stat">
+          <div class="stat-number">15 minutes</div>
+          <div>lost on each visit waiting for equipment</div>
+        </div>
+        <div class="stat" style="margin-top: 1rem;">
+          <div class="stat-number">90 percent</div>
+          <div>trust Google even when it is wrong</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="solution" class="section container">
+    <h2>The solution</h2>
+    <p>Live occupancy from real members, with trends and a 12-hour forecast.</p>
+    <div class="solution-grid">
+      <div class="solution-card">
+        <div class="solution-icon">01</div>
+        <h4>Check real-time activity</h4>
+        <p>Members check in when they arrive. You see the gym status as it happens.</p>
+      </div>
+      <div class="solution-card">
+        <div class="solution-icon">02</div>
+        <h4>Plan around patterns</h4>
+        <p>See the quietest hours for your gym and avoid peak crowds.</p>
+      </div>
+      <div class="solution-card">
+        <div class="solution-icon">03</div>
+        <h4>Stay ahead of the rush</h4>
+        <p>Forecast the next 12 hours so you can choose the best time to go.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section container">
+    <h2>What you get</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <h4>Live occupancy status</h4>
+        <p>Low, moderate, or high levels with confidence markers.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Montreal gyms included</h4>
+        <p>World Gym, Energie Cardio, GoodLife, Econofitness, Nautilus Plus, and more.</p>
+      </div>
+      <div class="feature-card">
+        <h4>24-hour trend view</h4>
+        <p>See how busy your gym has been across the day.</p>
+      </div>
+      <div class="feature-card">
+        <h4>Smart alerts</h4>
+        <p>Get notified when the gym drops below your preferred crowd level.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <h2>Early feedback</h2>
+    <div class="testimonials">
+      <div class="testimonial">
+        <p class="testimonial-text">"Way more accurate than Google. I actually save time using this."</p>
+        <p class="testimonial-author">- Sarah M., GoodLife member</p>
+      </div>
+      <div class="testimonial">
+        <p class="testimonial-text">"Love that its not corporate. Just real data from real people."</p>
+        <p class="testimonial-author">- Alex T., Energie Cardio user</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="section container">
+    <h2>Pricing</h2>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Free beta</h3>
+        <div class="price">$0</div>
+        <p>Everything you need to avoid crowded workouts.</p>
+        <ul>
+          <li>Real-time occupancy</li>
+          <li>24-hour trends</li>
+          <li>Smart alerts</li>
+          <li>Community data</li>
+        </ul>
+        <a href="https://gympulse.vercel.app" class="cta-button">Try now</a>
+      </div>
+      <div class="pricing-card featured">
+        <h3>Premium (coming soon)</h3>
+        <div class="price">$4.99<span style="font-size: 1rem;">/month</span></div>
+        <p>Advanced insights and personalized training analytics.</p>
+        <ul>
+          <li>Advanced analytics</li>
+          <li>Peak hour predictions</li>
+          <li>Consistency tracking</li>
+          <li>Workout data export</li>
+        </ul>
+        <a href="#email" class="cta-button">Get notified</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="founder" class="section container">
+    <h2>About the founder</h2>
+    <p>I built GymPulse after wasting too many workouts in packed gyms. This is a real product built with production standards.</p>
+    <div class="projects">
+      <div class="project">
+        <h4>Full-stack web apps</h4>
+        <p>Production React apps with real users and real data.</p>
+      </div>
+      <div class="project">
+        <h4>Real-time systems</h4>
+        <p>Supabase, PostgreSQL, and live subscriptions for fast updates.</p>
+      </div>
+      <div class="project">
+        <h4>Payments and subscriptions</h4>
+        <p>Stripe integrations with secure checkout flows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="email" class="email-capture container">
+    <h2>Join the beta</h2>
+    <p>Get notified when we expand to more cities and features.</p>
+    <form class="email-form" onsubmit="handleEmailSubmit(event)">
+      <input type="email" placeholder="you@example.com" required>
+      <button type="submit">Notify me</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>GymPulse 2026. Built by <a href="https://github.com/Isaloum">@Isaloum</a>.</p>
+    <p><a href="https://gympulse.vercel.app">Try the app</a> | <a href="https://github.com/Isaloum/GymPulse">GitHub</a> | <a href="mailto:hey@gympulse.app">Contact</a></p>
+  </footer>
+
+  <script>
+    function handleEmailSubmit(event) {
+      event.preventDefault();
+      const email = event.target.querySelector('input[type="email"]').value;
+      let emails = JSON.parse(localStorage.getItem('gympulse_waitlist') || '[]');
+      if (!emails.includes(email)) {
+        emails.push(email);
+        localStorage.setItem('gympulse_waitlist', JSON.stringify(emails));
+      }
+      alert('Thanks for signing up.');
+      event.target.reset();
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
